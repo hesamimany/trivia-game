@@ -26,6 +26,9 @@ public class Server {
     public void startConn() {
         System.out.println("1231");
         connThread.start();
+
+
+
         System.out.println("4321");
         while(numClients!=3);
 
