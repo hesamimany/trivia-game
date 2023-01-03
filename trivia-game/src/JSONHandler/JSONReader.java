@@ -1,3 +1,5 @@
+package JSONHandler;
+
 import java.io.*;
 import java.util.*;
 
@@ -6,7 +8,7 @@ import org.json.simple.parser.JSONParser;
 
 public class JSONReader {
     public static void main(String[] args) {
-        ArrayList<User> test = getUsers("G:\\Ghazal\\Semester5\\Computer Networks.Ahangari\\project\\trivia-game\\trivia-game\\users.json");
+        ArrayList<User> test = getUsers("users.json");
         for(int i=0;i<test.size();i++){
             System.out.println(test.get(i).name);
         }

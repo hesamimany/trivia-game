@@ -1,0 +1,443 @@
+Index: src/Server.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>import com.sun.source.tree.WhileLoopTree;\r\n\r\nimport java.awt.datatransfer.Transferable;\r\nimport java.io.*;\r\nimport java.net.ServerSocket;\r\nimport java.net.Socket;\r\nimport java.net.SocketException;\r\nimport java.util.ArrayList;\r\nimport java.util.Scanner;\r\n\r\npublic class Server {\r\n    int Port;\r\n    ConnThread connThread = new ConnThread();\r\n    ServerSocket serverSocket;\r\n    Socket server;\r\n    ArrayList<ClientThread> threads = new ArrayList<>();\r\n    int numClients = 0; //how many clients\r\n    int threadID = -1; //who sent data\r\n    boolean newGame = false; //new game started or not\r\n\r\n\r\n    public Server(int port) {\r\n        this.Port = port;\r\n    }\r\n\r\n    public void startConn() {\r\n        System.out.println(\"1231\");\r\n        connThread.start();\r\n\r\n\r\n\r\n        System.out.println(\"4321\");\r\n        while(numClients!=3);\r\n\r\n    }\r\n\r\n    public void send(String data, int index) {\r\n        try {\r\n            threads.get(index).out.write(data);\r\n        } catch (Exception e) {\r\n            System.out.println(\"Failed to send data to client: \" + index);\r\n            e.printStackTrace();\r\n        }\r\n    }\r\n\r\n    public void closeConn() throws Exception {\r\n        try {\r\n            connThread.closeConn();\r\n        } catch (Exception e) {\r\n            System.out.println(\"Could not close server socket\");\r\n        }\r\n    }\r\n\r\n    public static void main(String[] args) {\r\n        Server server = new Server(5000);\r\n        server.startConn();\r\n    }\r\n\r\n\r\n    class ConnThread extends Thread {\r\n        ServerSocket serverSocket;\r\n\r\n        public void run() {\r\n            try {\r\n                serverSocket = new ServerSocket(Port);\r\n                System.out.println(\"Server created on port \" + Port);\r\n\r\n                int counter = 0;\r\n                while (true) {\r\n                    ClientThread t1 = new ClientThread(serverSocket.accept());\r\n                    if (newGame) {\r\n                        newGame = false;\r\n                        counter = 0;\r\n                    }\r\n                    if (counter < 4) {\r\n                        threads.add(t1);\r\n                        numClients++;\r\n                        t1.start();\r\n                        t1.setUsername(Integer.toString(numClients - 1));\r\n                        counter++;\r\n                    }\r\n\r\n                }\r\n            } catch (Exception e) {\r\n                e.printStackTrace();\r\n            }\r\n\r\n        }\r\n\r\n        public void closeConn() {\r\n            try {\r\n                serverSocket.close();\r\n            } catch (Exception e) {\r\n            }\r\n        }\r\n\r\n\r\n    }\r\n\r\n    class ClientThread extends Thread {\r\n        String username;\r\n        private Socket socket;\r\n        private BufferedReader in;\r\n        private BufferedWriter out;\r\n        int score = -1;\r\n        int rank;\r\n\r\n\r\n        public ClientThread(Socket socket) {\r\n            this.socket = socket;\r\n        }\r\n\r\n        public void setUsername(String username) {\r\n            this.username = username;\r\n        }\r\n\r\n        public void run() {\r\n\r\n            try {\r\n                BufferedWriter out = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));\r\n                BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));\r\n                this.out = out;\r\n\r\n\r\n                while (true) {\r\n                    String input = in.readLine();\r\n                    System.out.println(input);\r\n                }\r\n\r\n            } catch (Exception e) {\r\n                System.out.println(\"Client: \" + username + \" closed\");\r\n                for (int i = 0; i < threads.size(); i++) {\r\n                    if (!threads.get(i).socket.isClosed()) {\r\n                        send(\"Client disconnected\", i);\r\n                    }\r\n                }\r\n            }\r\n        }\r\n    }\r\n}\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/src/Server.java b/src/Server.java
+--- a/src/Server.java	(revision f0dc4e4fbd691e377958731acda98618e62095ce)
++++ b/src/Server.java	(date 1672749398058)
+@@ -1,12 +1,8 @@
+-import com.sun.source.tree.WhileLoopTree;
+-
+-import java.awt.datatransfer.Transferable;
+-import java.io.*;
++import java.io.ObjectInputStream;
++import java.io.ObjectOutputStream;
+ import java.net.ServerSocket;
+ import java.net.Socket;
+-import java.net.SocketException;
+ import java.util.ArrayList;
+-import java.util.Scanner;
+ 
+ public class Server {
+     int Port;
+@@ -26,23 +22,31 @@
+     public void startConn() {
+         System.out.println("1231");
+         connThread.start();
+-
+-
+-
+         System.out.println("4321");
+-        while(numClients!=3);
++        while (true) ;
+ 
+     }
+ 
+     public void send(String data, int index) {
+         try {
+-            threads.get(index).out.write(data);
++            threads.get(index).out.writeUTF(data);
+         } catch (Exception e) {
+             System.out.println("Failed to send data to client: " + index);
+             e.printStackTrace();
+         }
+     }
+ 
++    public void sendAll(String data) {
++        try {
++            for (ClientThread ct : threads) {
++                ct.out.writeUTF(data);
++                ct.out.flush();
++            }
++        } catch (Exception e) {
++            e.printStackTrace();
++        }
++    }
++
+     public void closeConn() throws Exception {
+         try {
+             connThread.closeConn();
+@@ -65,9 +69,10 @@
+                 serverSocket = new ServerSocket(Port);
+                 System.out.println("Server created on port " + Port);
+ 
+-                int counter = 0;
++                int counter = 1;
+                 while (true) {
+                     ClientThread t1 = new ClientThread(serverSocket.accept());
++
+                     if (newGame) {
+                         newGame = false;
+                         counter = 0;
+@@ -79,8 +84,15 @@
+                         t1.setUsername(Integer.toString(numClients - 1));
+                         counter++;
+                     }
+-
++                    if (counter == 4) {
++                        System.out.println("hello");
++                        break;
++                    }
+                 }
++                Thread.sleep(500);
++                System.out.println("hello again");
++
++
+             } catch (Exception e) {
+                 e.printStackTrace();
+             }
+@@ -100,8 +112,8 @@
+     class ClientThread extends Thread {
+         String username;
+         private Socket socket;
+-        private BufferedReader in;
+-        private BufferedWriter out;
++        private ObjectInputStream in;
++        private ObjectOutputStream out;
+         int score = -1;
+         int rank;
+ 
+@@ -117,13 +129,11 @@
+         public void run() {
+ 
+             try {
+-                BufferedWriter out = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
+-                BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+-                this.out = out;
+-
+-
++                out = new ObjectOutputStream(socket.getOutputStream());
++                in = new ObjectInputStream(socket.getInputStream());
++                System.out.println("123456");
+                 while (true) {
+-                    String input = in.readLine();
++                    String input = in.readUTF();
+                     System.out.println(input);
+                 }
+ 
+Index: src/JSONReader.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>import java.io.*;\r\nimport java.util.*;\r\nimport org.json.simple.*;\r\nimport org.json.simple.parser.JSONParser;\r\n\r\npublic class JSONReader {\r\n    public static void main(String[] args) {\r\n        JSONParser parser = new JSONParser();\r\n        try {\r\n            JSONArray obj = (JSONArray) parser.parse(new FileReader(\"users.json\"));\r\n            for(Object o: obj){\r\n                JSONObject jsonObject = (JSONObject) o;\r\n                String question = (String)jsonObject.get(\"question\");\r\n                long answer = (long)jsonObject.get(\"answer\");\r\n                JSONArray options = (JSONArray)jsonObject.get(\"options\");\r\n                System.out.println(\"question: \" + question);\r\n                System.out.println(\"answer: \" + answer);\r\n                System.out.println(\"options:\");\r\n                Iterator iterator = options.iterator();\r\n                while (iterator.hasNext()) {\r\n                    System.out.println(iterator.next());\r\n                }\r\n            }\r\n\r\n\r\n        } catch(Exception e) {\r\n            e.printStackTrace();\r\n        }\r\n    }\r\n}\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/src/JSONReader.java b/src/JSONReader.java
+--- a/src/JSONReader.java	(revision f0dc4e4fbd691e377958731acda98618e62095ce)
++++ b/src/JSONReader.java	(date 1672749398058)
+@@ -1,5 +1,6 @@
+ import java.io.*;
+ import java.util.*;
++
+ import org.json.simple.*;
+ import org.json.simple.parser.JSONParser;
+ 
+@@ -8,11 +9,11 @@
+         JSONParser parser = new JSONParser();
+         try {
+             JSONArray obj = (JSONArray) parser.parse(new FileReader("users.json"));
+-            for(Object o: obj){
++            for (Object o : obj) {
+                 JSONObject jsonObject = (JSONObject) o;
+-                String question = (String)jsonObject.get("question");
+-                long answer = (long)jsonObject.get("answer");
+-                JSONArray options = (JSONArray)jsonObject.get("options");
++                String question = (String) jsonObject.get("question");
++                long answer = (long) jsonObject.get("answer");
++                JSONArray options = (JSONArray) jsonObject.get("options");
+                 System.out.println("question: " + question);
+                 System.out.println("answer: " + answer);
+                 System.out.println("options:");
+@@ -23,7 +24,7 @@
+             }
+ 
+ 
+-        } catch(Exception e) {
++        } catch (Exception e) {
+             e.printStackTrace();
+         }
+     }
+Index: src/Client.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>import java.io.*;\r\nimport java.net.Socket;\r\nimport java.util.Scanner;\r\n\r\npublic class Client{\r\n\r\n    String IP;\r\n    int Port;\r\n    Socket clientSocket;\r\n\r\n    InputStreamReader streamReader;\r\n    OutputStreamWriter streamWriter;\r\n\r\n    BufferedReader bufferedReader;\r\n    BufferedWriter bufferedWriter;\r\n\r\n    public Client(String IP, int port) {\r\n        this.IP = IP;\r\n        Port = port;\r\n\r\n        try {\r\n            clientSocket = new Socket(IP, port);\r\n\r\n            streamReader = new InputStreamReader(clientSocket.getInputStream());\r\n            streamWriter = new OutputStreamWriter(clientSocket.getOutputStream());\r\n\r\n            bufferedReader = new BufferedReader(streamReader);\r\n            bufferedWriter = new BufferedWriter(streamWriter);\r\n\r\n\r\n\r\n\r\n            while (true) {\r\n                Scanner scanner = new Scanner(System.in);\r\n                String message = scanner.nextLine();\r\n                bufferedWriter.write(message);\r\n                bufferedWriter.newLine();\r\n                bufferedWriter.flush();\r\n\r\n                if (message.equalsIgnoreCase(\"FINISH\")) break;\r\n\r\n            }\r\n        } catch (IOException e) {\r\n            e.printStackTrace();\r\n        } finally {\r\n            try {\r\n                if (clientSocket != null)\r\n                    clientSocket.close();\r\n                if (streamReader != null)\r\n                    streamReader.close();\r\n                if (streamWriter != null)\r\n                    streamWriter.close();\r\n                if (bufferedReader != null)\r\n                    bufferedReader.close();\r\n                if (bufferedWriter != null)\r\n                    bufferedWriter.close();\r\n            } catch (IOException e) {\r\n                e.printStackTrace();\r\n            }\r\n        }\r\n    }\r\n\r\n    class ConnectionThread extends Thread{\r\n        @Override\r\n        public void run() {\r\n\r\n        }\r\n    }\r\n\r\n    public static void main(String[] args) {\r\n        Client client = new Client(\"127.0.0.1\",5000);\r\n    }\r\n}
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/src/Client.java b/src/Client.java
+--- a/src/Client.java	(revision f0dc4e4fbd691e377958731acda98618e62095ce)
++++ b/src/Client.java	(date 1672749398058)
+@@ -2,17 +2,14 @@
+ import java.net.Socket;
+ import java.util.Scanner;
+ 
+-public class Client{
++public class Client {
+ 
+     String IP;
+     int Port;
+     Socket clientSocket;
+ 
+-    InputStreamReader streamReader;
+-    OutputStreamWriter streamWriter;
+-
+-    BufferedReader bufferedReader;
+-    BufferedWriter bufferedWriter;
++    ObjectInputStream in;
++    ObjectOutputStream out;
+ 
+     public Client(String IP, int port) {
+         this.IP = IP;
+@@ -20,54 +17,86 @@
+ 
+         try {
+             clientSocket = new Socket(IP, port);
+-
+-            streamReader = new InputStreamReader(clientSocket.getInputStream());
+-            streamWriter = new OutputStreamWriter(clientSocket.getOutputStream());
+-
+-            bufferedReader = new BufferedReader(streamReader);
+-            bufferedWriter = new BufferedWriter(streamWriter);
+-
+-
+-
+-
+-            while (true) {
+-                Scanner scanner = new Scanner(System.in);
+-                String message = scanner.nextLine();
+-                bufferedWriter.write(message);
+-                bufferedWriter.newLine();
+-                bufferedWriter.flush();
+-
+-                if (message.equalsIgnoreCase("FINISH")) break;
+-
+-            }
++            ReadThread readThread = new ReadThread(clientSocket);
++            readThread.start();
++            WriteThread writeThread = new WriteThread(clientSocket);
++            writeThread.start();
++            while (true) ;
+         } catch (IOException e) {
+             e.printStackTrace();
+         } finally {
+             try {
+                 if (clientSocket != null)
+                     clientSocket.close();
+-                if (streamReader != null)
+-                    streamReader.close();
+-                if (streamWriter != null)
+-                    streamWriter.close();
+-                if (bufferedReader != null)
+-                    bufferedReader.close();
+-                if (bufferedWriter != null)
+-                    bufferedWriter.close();
++                if (in != null)
++                    in.close();
++                if (out != null)
++                    out.close();
+             } catch (IOException e) {
+                 e.printStackTrace();
+             }
+         }
+     }
++
++    class WriteThread extends Thread {
++        Socket socket;
++        ObjectOutputStream out;
++
++        public WriteThread(Socket socket) {
++            try {
++                this.socket = socket;
++                out = new ObjectOutputStream(socket.getOutputStream());
++            } catch (Exception e) {
++                e.printStackTrace();
++            }
++        }
+ 
+-    class ConnectionThread extends Thread{
+         @Override
+         public void run() {
+ 
++            try {
++                Thread.sleep(1000);
++                while (true) {
++                    Scanner scanner = new Scanner(System.in);
++                    out.writeUTF(scanner.nextLine());
++                    out.flush();
++                }
++            } catch (Exception e) {
++                e.printStackTrace();
++            }
++        }
++    }
++
++    class ReadThread extends Thread {
++        Socket socket;
++        ObjectInputStream in;
++
++        public ReadThread(Socket socket) {
++            try {
++                this.socket = socket;
++                in = new ObjectInputStream(socket.getInputStream());
++            } catch (Exception e) {
++                e.printStackTrace();
++            }
++        }
++
++        @Override
++        public void run() {
++            while (true) {
++                try {
++                    Thread.sleep(1000);
++                    String input = in.readUTF();
++                    System.out.println(input);
++                } catch (Exception e) {
++                    e.printStackTrace();
++                }
++            }
+         }
+     }
+ 
+     public static void main(String[] args) {
+-        Client client = new Client("127.0.0.1",5000);
++        Client client = new Client("127.0.0.1", 5000);
+     }
++
++
+ }
+\ No newline at end of file
+Index: src/Message.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/src/Message.java b/src/Message.java
+new file mode 100644
+--- /dev/null	(date 1672749398042)
++++ b/src/Message.java	(date 1672749398042)
+@@ -0,0 +1,26 @@
++public class Message {
++    String data, from, to;
++
++    public Message(String data, String from, String to) {
++        this.data = data;
++        this.from = from;
++        this.to = to;
++    }
++
++    public String getData() {
++        return data;
++    }
++
++    public String getFrom() {
++        return from;
++    }
++
++    public String getTo() {
++        return to;
++    }
++
++    @Override
++    public String toString() {
++        return String.format("%s:%s %s", from, to, data);
++    }
++}
+Index: .idea/workspace.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+><?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n<project version=\"4\">\r\n  <component name=\"ChangeListManager\">\r\n    <list default=\"true\" id=\"4b71411a-1f21-48c5-863b-2788d0054d38\" name=\"Changes\" comment=\"test\">\r\n      <change afterPath=\"$PROJECT_DIR$/.idea/libraries/json_simple_1_1.xml\" afterDir=\"false\" />\r\n      <change afterPath=\"$PROJECT_DIR$/json-simple-1.1.jar\" afterDir=\"false\" />\r\n      <change beforePath=\"$PROJECT_DIR$/.idea/workspace.xml\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/.idea/workspace.xml\" afterDir=\"false\" />\r\n      <change beforePath=\"$PROJECT_DIR$/Java.iml\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/Java.iml\" afterDir=\"false\" />\r\n      <change beforePath=\"$PROJECT_DIR$/out/production/Java/Client$ConnectionThread.class\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/out/production/Java/Client$ConnectionThread.class\" afterDir=\"false\" />\r\n      <change beforePath=\"$PROJECT_DIR$/out/production/Java/Client.class\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/out/production/Java/Client.class\" afterDir=\"false\" />\r\n      <change beforePath=\"$PROJECT_DIR$/out/production/Java/Server$ClientThread.class\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/out/production/Java/Server$ClientThread.class\" afterDir=\"false\" />\r\n      <change beforePath=\"$PROJECT_DIR$/out/production/Java/Server$ConnThread.class\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/out/production/Java/Server$ConnThread.class\" afterDir=\"false\" />\r\n      <change beforePath=\"$PROJECT_DIR$/out/production/Java/Server.class\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/out/production/Java/Server.class\" afterDir=\"false\" />\r\n      <change beforePath=\"$PROJECT_DIR$/src/Client.java\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/src/Client.java\" afterDir=\"false\" />\r\n      <change beforePath=\"$PROJECT_DIR$/src/Server.java\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/src/Server.java\" afterDir=\"false\" />\r\n      <change beforePath=\"$PROJECT_DIR$/src/jason_read.java\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/src/JSONReader.java\" afterDir=\"false\" />\r\n    </list>\r\n    <option name=\"SHOW_DIALOG\" value=\"false\" />\r\n    <option name=\"HIGHLIGHT_CONFLICTS\" value=\"true\" />\r\n    <option name=\"HIGHLIGHT_NON_ACTIVE_CHANGELIST\" value=\"false\" />\r\n    <option name=\"LAST_RESOLUTION\" value=\"IGNORE\" />\r\n  </component>\r\n  <component name=\"FileTemplateManagerImpl\">\r\n    <option name=\"RECENT_TEMPLATES\">\r\n      <list>\r\n        <option value=\"Class\" />\r\n      </list>\r\n    </option>\r\n  </component>\r\n  <component name=\"Git.Merge.Settings\">\r\n    <option name=\"BRANCH\" value=\"main/main\" />\r\n  </component>\r\n  <component name=\"Git.Settings\">\r\n    <option name=\"RECENT_GIT_ROOT_PATH\" value=\"$PROJECT_DIR$/..\" />\r\n  </component>\r\n  <component name=\"GitSEFilterConfiguration\">\r\n    <file-type-list>\r\n      <filtered-out-file-type name=\"LOCAL_BRANCH\" />\r\n      <filtered-out-file-type name=\"REMOTE_BRANCH\" />\r\n      <filtered-out-file-type name=\"TAG\" />\r\n      <filtered-out-file-type name=\"COMMIT_BY_MESSAGE\" />\r\n    </file-type-list>\r\n  </component>\r\n  <component name=\"MarkdownSettingsMigration\">\r\n    <option name=\"stateVersion\" value=\"1\" />\r\n  </component>\r\n  <component name=\"ProjectId\" id=\"2IqhT3lJ5owtDvKA1qSd12UFFFS\" />\r\n  <component name=\"ProjectLevelVcsManager\" settingsEditedManually=\"true\" />\r\n  <component name=\"ProjectViewState\">\r\n    <option name=\"hideEmptyMiddlePackages\" value=\"true\" />\r\n    <option name=\"showLibraryContents\" value=\"true\" />\r\n  </component>\r\n  <component name=\"PropertiesComponent\">\r\n    <property name=\"RunOnceActivity.OpenProjectViewOnStart\" value=\"true\" />\r\n    <property name=\"RunOnceActivity.ShowReadmeOnStart\" value=\"true\" />\r\n    <property name=\"SHARE_PROJECT_CONFIGURATION_FILES\" value=\"true\" />\r\n    <property name=\"WebServerToolWindowFactoryState\" value=\"false\" />\r\n    <property name=\"last_opened_file_path\" value=\"$PROJECT_DIR$/json-simple-1.1.jar\" />\r\n    <property name=\"nodejs_package_manager_path\" value=\"npm\" />\r\n    <property name=\"project.structure.last.edited\" value=\"Libraries\" />\r\n    <property name=\"project.structure.proportion\" value=\"0.15\" />\r\n    <property name=\"project.structure.side.proportion\" value=\"0.2\" />\r\n    <property name=\"settings.editor.selected.configurable\" value=\"MTConfigurable\" />\r\n  </component>\r\n  <component name=\"RunManager\" selected=\"Application.Client\">\r\n    <configuration name=\"Client\" type=\"Application\" factoryName=\"Application\" singleton=\"false\" temporary=\"true\" nameIsGenerated=\"true\">\r\n      <option name=\"MAIN_CLASS_NAME\" value=\"Client\" />\r\n      <module name=\"Java\" />\r\n      <method v=\"2\">\r\n        <option name=\"Make\" enabled=\"true\" />\r\n      </method>\r\n    </configuration>\r\n    <configuration name=\"Server\" type=\"Application\" factoryName=\"Application\" temporary=\"true\" nameIsGenerated=\"true\">\r\n      <option name=\"MAIN_CLASS_NAME\" value=\"Server\" />\r\n      <module name=\"Java\" />\r\n      <method v=\"2\">\r\n        <option name=\"Make\" enabled=\"true\" />\r\n      </method>\r\n    </configuration>\r\n    <list>\r\n      <item itemvalue=\"Application.Client\" />\r\n      <item itemvalue=\"Application.Server\" />\r\n    </list>\r\n    <recent_temporary>\r\n      <list>\r\n        <item itemvalue=\"Application.Client\" />\r\n        <item itemvalue=\"Application.Server\" />\r\n      </list>\r\n    </recent_temporary>\r\n  </component>\r\n  <component name=\"SpellCheckerSettings\" RuntimeDictionaries=\"0\" Folders=\"0\" CustomDictionaries=\"0\" DefaultDictionary=\"application-level\" UseSingleDictionary=\"true\" transferred=\"true\" />\r\n  <component name=\"TaskManager\">\r\n    <task active=\"true\" id=\"Default\" summary=\"Default task\">\r\n      <changelist id=\"4b71411a-1f21-48c5-863b-2788d0054d38\" name=\"Changes\" comment=\"\" />\r\n      <created>1670915025112</created>\r\n      <option name=\"number\" value=\"Default\" />\r\n      <option name=\"presentableId\" value=\"Default\" />\r\n      <updated>1670915025112</updated>\r\n      <workItem from=\"1670915026737\" duration=\"3489000\" />\r\n      <workItem from=\"1671021736988\" duration=\"5100000\" />\r\n      <workItem from=\"1671360833149\" duration=\"6616000\" />\r\n      <workItem from=\"1671396057819\" duration=\"2327000\" />\r\n      <workItem from=\"1671444851589\" duration=\"2396000\" />\r\n      <workItem from=\"1672230458037\" duration=\"810000\" />\r\n      <workItem from=\"1672231331038\" duration=\"1452000\" />\r\n      <workItem from=\"1672233562257\" duration=\"4545000\" />\r\n      <workItem from=\"1672638922387\" duration=\"50000\" />\r\n      <workItem from=\"1672740252026\" duration=\"1211000\" />\r\n    </task>\r\n    <task id=\"LOCAL-00001\" summary=\"First commit\">\r\n      <created>1672231718312</created>\r\n      <option name=\"number\" value=\"00001\" />\r\n      <option name=\"presentableId\" value=\"LOCAL-00001\" />\r\n      <option name=\"project\" value=\"LOCAL\" />\r\n      <updated>1672231718312</updated>\r\n    </task>\r\n    <task id=\"LOCAL-00002\" summary=\"first commit\">\r\n      <created>1672233593887</created>\r\n      <option name=\"number\" value=\"00002\" />\r\n      <option name=\"presentableId\" value=\"LOCAL-00002\" />\r\n      <option name=\"project\" value=\"LOCAL\" />\r\n      <updated>1672233593887</updated>\r\n    </task>\r\n    <task id=\"LOCAL-00003\" summary=\"first commit\">\r\n      <created>1672233686843</created>\r\n      <option name=\"number\" value=\"00003\" />\r\n      <option name=\"presentableId\" value=\"LOCAL-00003\" />\r\n      <option name=\"project\" value=\"LOCAL\" />\r\n      <updated>1672233686843</updated>\r\n    </task>\r\n    <task id=\"LOCAL-00004\" summary=\"test\">\r\n      <created>1672234131958</created>\r\n      <option name=\"number\" value=\"00004\" />\r\n      <option name=\"presentableId\" value=\"LOCAL-00004\" />\r\n      <option name=\"project\" value=\"LOCAL\" />\r\n      <updated>1672234131958</updated>\r\n    </task>\r\n    <option name=\"localTasksCounter\" value=\"5\" />\r\n    <servers />\r\n  </component>\r\n  <component name=\"TypeScriptGeneratedFilesManager\">\r\n    <option name=\"version\" value=\"3\" />\r\n  </component>\r\n  <component name=\"Vcs.Log.Tabs.Properties\">\r\n    <option name=\"TAB_STATES\">\r\n      <map>\r\n        <entry key=\"MAIN\">\r\n          <value>\r\n            <State />\r\n          </value>\r\n        </entry>\r\n      </map>\r\n    </option>\r\n  </component>\r\n  <component name=\"VcsManagerConfiguration\">\r\n    <MESSAGE value=\"First commit\" />\r\n    <MESSAGE value=\"first commit\" />\r\n    <MESSAGE value=\"test\" />\r\n    <option name=\"LAST_COMMIT_MESSAGE\" value=\"test\" />\r\n  </component>\r\n</project>
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/.idea/workspace.xml b/.idea/workspace.xml
+--- a/.idea/workspace.xml	(revision f0dc4e4fbd691e377958731acda98618e62095ce)
++++ b/.idea/workspace.xml	(date 1672749491312)
+@@ -1,19 +1,17 @@
+ <?xml version="1.0" encoding="UTF-8"?>
+ <project version="4">
+   <component name="ChangeListManager">
+-    <list default="true" id="4b71411a-1f21-48c5-863b-2788d0054d38" name="Changes" comment="test">
+-      <change afterPath="$PROJECT_DIR$/.idea/libraries/json_simple_1_1.xml" afterDir="false" />
+-      <change afterPath="$PROJECT_DIR$/json-simple-1.1.jar" afterDir="false" />
++    <list default="true" id="4b71411a-1f21-48c5-863b-2788d0054d38" name="Changes" comment="JSONReader Lib">
++      <change afterPath="$PROJECT_DIR$/src/Message.java" afterDir="false" />
+       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+-      <change beforePath="$PROJECT_DIR$/Java.iml" beforeDir="false" afterPath="$PROJECT_DIR$/Java.iml" afterDir="false" />
+-      <change beforePath="$PROJECT_DIR$/out/production/Java/Client$ConnectionThread.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/Java/Client$ConnectionThread.class" afterDir="false" />
++      <change beforePath="$PROJECT_DIR$/out/production/Java/Client$ConnectionThread.class" beforeDir="false" />
+       <change beforePath="$PROJECT_DIR$/out/production/Java/Client.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/Java/Client.class" afterDir="false" />
+       <change beforePath="$PROJECT_DIR$/out/production/Java/Server$ClientThread.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/Java/Server$ClientThread.class" afterDir="false" />
+       <change beforePath="$PROJECT_DIR$/out/production/Java/Server$ConnThread.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/Java/Server$ConnThread.class" afterDir="false" />
+       <change beforePath="$PROJECT_DIR$/out/production/Java/Server.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/Java/Server.class" afterDir="false" />
+       <change beforePath="$PROJECT_DIR$/src/Client.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Client.java" afterDir="false" />
++      <change beforePath="$PROJECT_DIR$/src/JSONReader.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/JSONReader.java" afterDir="false" />
+       <change beforePath="$PROJECT_DIR$/src/Server.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Server.java" afterDir="false" />
+-      <change beforePath="$PROJECT_DIR$/src/jason_read.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/JSONReader.java" afterDir="false" />
+     </list>
+     <option name="SHOW_DIALOG" value="false" />
+     <option name="HIGHLIGHT_CONFLICTS" value="true" />
+@@ -51,6 +49,7 @@
+     <option name="showLibraryContents" value="true" />
+   </component>
+   <component name="PropertiesComponent">
++    <property name="ASKED_SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
+     <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
+     <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
+     <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
+@@ -61,6 +60,11 @@
+     <property name="project.structure.proportion" value="0.15" />
+     <property name="project.structure.side.proportion" value="0.2" />
+     <property name="settings.editor.selected.configurable" value="MTConfigurable" />
++  </component>
++  <component name="Push.Settings">
++    <force-push-targets>
++      <force-push-target remote-path="origin" branch="main" />
++    </force-push-targets>
+   </component>
+   <component name="RunManager" selected="Application.Client">
+     <configuration name="Client" type="Application" factoryName="Application" singleton="false" temporary="true" nameIsGenerated="true">
+@@ -105,7 +109,7 @@
+       <workItem from="1672231331038" duration="1452000" />
+       <workItem from="1672233562257" duration="4545000" />
+       <workItem from="1672638922387" duration="50000" />
+-      <workItem from="1672740252026" duration="1211000" />
++      <workItem from="1672740252026" duration="8642000" />
+     </task>
+     <task id="LOCAL-00001" summary="First commit">
+       <created>1672231718312</created>
+@@ -135,7 +139,21 @@
+       <option name="project" value="LOCAL" />
+       <updated>1672234131958</updated>
+     </task>
+-    <option name="localTasksCounter" value="5" />
++    <task id="LOCAL-00005" summary="JSONReader Lib">
++      <created>1672741784600</created>
++      <option name="number" value="00005" />
++      <option name="presentableId" value="LOCAL-00005" />
++      <option name="project" value="LOCAL" />
++      <updated>1672741784600</updated>
++    </task>
++    <task id="LOCAL-00006" summary="JSONReader Lib">
++      <created>1672741809489</created>
++      <option name="number" value="00006" />
++      <option name="presentableId" value="LOCAL-00006" />
++      <option name="project" value="LOCAL" />
++      <updated>1672741809489</updated>
++    </task>
++    <option name="localTasksCounter" value="7" />
+     <servers />
+   </component>
+   <component name="TypeScriptGeneratedFilesManager">
+@@ -156,6 +174,7 @@
+     <MESSAGE value="First commit" />
+     <MESSAGE value="first commit" />
+     <MESSAGE value="test" />
+-    <option name="LAST_COMMIT_MESSAGE" value="test" />
++    <MESSAGE value="JSONReader Lib" />
++    <option name="LAST_COMMIT_MESSAGE" value="JSONReader Lib" />
+   </component>
+ </project>
+\ No newline at end of file

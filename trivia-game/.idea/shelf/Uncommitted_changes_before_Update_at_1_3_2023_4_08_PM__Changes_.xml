@@ -1,0 +1,29 @@
+<changelist name="Uncommitted_changes_before_Update_at_1_3_2023_4_08_PM_[Changes]" date="1672749494831" recycled="false" toDelete="true">
+  <option name="PATH" value="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_1_3_2023_4_08_PM_[Changes]/shelved.patch" />
+  <option name="DESCRIPTION" value="Uncommitted changes before Update at 1/3/2023 4:08 PM [Changes]" />
+  <binary>
+    <option name="BEFORE_PATH" value="out/production/Java/Server.class" />
+    <option name="AFTER_PATH" value="out/production/Java/Server.class" />
+    <option name="SHELVED_PATH" value="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_1_3_2023_4_08_PM_[Changes]/Server.class" />
+  </binary>
+  <binary>
+    <option name="BEFORE_PATH" value="out/production/Java/Client$ConnectionThread.class" />
+    <option name="AFTER_PATH" />
+    <option name="SHELVED_PATH" />
+  </binary>
+  <binary>
+    <option name="BEFORE_PATH" value="out/production/Java/Server$ConnThread.class" />
+    <option name="AFTER_PATH" value="out/production/Java/Server$ConnThread.class" />
+    <option name="SHELVED_PATH" value="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_1_3_2023_4_08_PM_[Changes]/Server$ConnThread.class" />
+  </binary>
+  <binary>
+    <option name="BEFORE_PATH" value="out/production/Java/Client.class" />
+    <option name="AFTER_PATH" value="out/production/Java/Client.class" />
+    <option name="SHELVED_PATH" value="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_1_3_2023_4_08_PM_[Changes]/Client.class" />
+  </binary>
+  <binary>
+    <option name="BEFORE_PATH" value="out/production/Java/Server$ClientThread.class" />
+    <option name="AFTER_PATH" value="out/production/Java/Server$ClientThread.class" />
+    <option name="SHELVED_PATH" value="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_1_3_2023_4_08_PM_[Changes]/Server$ClientThread.class" />
+  </binary>
+</changelist>
