@@ -1,12 +1,8 @@
-import com.sun.source.tree.WhileLoopTree;
-
-import java.awt.datatransfer.Transferable;
-import java.io.*;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.net.SocketException;
 import java.util.ArrayList;
-import java.util.Scanner;
 
 public class Server {
     int Port;
@@ -26,19 +22,27 @@ public class Server {
     public void startConn() {
         System.out.println("1231");
         connThread.start();
-
-
-
         System.out.println("4321");
-        while(numClients!=3);
+        while (true) ;
 
     }
 
     public void send(String data, int index) {
         try {
-            threads.get(index).out.write(data);
+            threads.get(index).out.writeUTF(data);
         } catch (Exception e) {
             System.out.println("Failed to send data to client: " + index);
+            e.printStackTrace();
+        }
+    }
+
+    public void sendAll(String data) {
+        try {
+            for (ClientThread ct : threads) {
+                ct.out.writeUTF(data);
+                ct.out.flush();
+            }
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
@@ -65,9 +69,10 @@ public class Server {
                 serverSocket = new ServerSocket(Port);
                 System.out.println("Server created on port " + Port);
 
-                int counter = 0;
+                int counter = 1;
                 while (true) {
                     ClientThread t1 = new ClientThread(serverSocket.accept());
+
                     if (newGame) {
                         newGame = false;
                         counter = 0;
@@ -79,8 +84,15 @@ public class Server {
                         t1.setUsername(Integer.toString(numClients - 1));
                         counter++;
                     }
-
+                    if (counter == 4) {
+                        System.out.println("hello");
+                        break;
+                    }
                 }
+                Thread.sleep(500);
+                System.out.println("hello again");
+
+
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -100,8 +112,8 @@ public class Server {
     class ClientThread extends Thread {
         String username;
         private Socket socket;
-        private BufferedReader in;
-        private BufferedWriter out;
+        private ObjectInputStream in;
+        private ObjectOutputStream out;
         int score = -1;
         int rank;
 
@@ -117,13 +129,11 @@ public class Server {
         public void run() {
 
             try {
-                BufferedWriter out = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
-                BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-                this.out = out;
-
-
+                out = new ObjectOutputStream(socket.getOutputStream());
+                in = new ObjectInputStream(socket.getInputStream());
+                System.out.println("123456");
                 while (true) {
-                    String input = in.readLine();
+                    String input = in.readUTF();
                     System.out.println(input);
                 }
 
