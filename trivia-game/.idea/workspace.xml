@@ -1,20 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="4b71411a-1f21-48c5-863b-2788d0054d38" name="Changes" comment="test">
-      <change afterPath="$PROJECT_DIR$/.idea/libraries/json_simple_1_1.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/json-simple-1.1.jar" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Java.iml" beforeDir="false" afterPath="$PROJECT_DIR$/Java.iml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/Java/Client$ConnectionThread.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/Java/Client$ConnectionThread.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/Java/Client.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/Java/Client.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/Java/Server$ClientThread.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/Java/Server$ClientThread.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/Java/Server$ConnThread.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/Java/Server$ConnThread.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/Java/Server.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/Java/Server.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Client.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Client.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Server.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Server.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/jason_read.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/JSONReader.java" afterDir="false" />
-    </list>
+    <list default="true" id="4b71411a-1f21-48c5-863b-2788d0054d38" name="Changes" comment="test" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -62,9 +49,16 @@
     <property name="project.structure.side.proportion" value="0.2" />
     <property name="settings.editor.selected.configurable" value="MTConfigurable" />
   </component>
-  <component name="RunManager" selected="Application.Client">
+  <component name="RunManager" selected="Application.JSONReader">
     <configuration name="Client" type="Application" factoryName="Application" singleton="false" temporary="true" nameIsGenerated="true">
       <option name="MAIN_CLASS_NAME" value="Client" />
+      <module name="Java" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="JSONReader" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
+      <option name="MAIN_CLASS_NAME" value="JSONReader" />
       <module name="Java" />
       <method v="2">
         <option name="Make" enabled="true" />
@@ -80,9 +74,11 @@
     <list>
       <item itemvalue="Application.Client" />
       <item itemvalue="Application.Server" />
+      <item itemvalue="Application.JSONReader" />
     </list>
     <recent_temporary>
       <list>
+        <item itemvalue="Application.JSONReader" />
         <item itemvalue="Application.Client" />
         <item itemvalue="Application.Server" />
       </list>
@@ -151,6 +147,7 @@
         </entry>
       </map>
     </option>
+    <option name="oldMeFiltersMigrated" value="true" />
   </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="First commit" />
