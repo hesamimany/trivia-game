@@ -2,13 +2,12 @@ import java.io.*;
 import java.util.*;
 import org.json.simple.*;
 import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
 
-public class jason_read {
+public class JSONReader {
     public static void main(String[] args) {
         JSONParser parser = new JSONParser();
         try {
-            JSONArray obj = (JSONArray) parser.parse(new FileReader("C:\\Users\\afarinesh pardaz\\IdeaProjects\\socket programming\\src\\questions.json"));
+            JSONArray obj = (JSONArray) parser.parse(new FileReader("users.json"));
             for(Object o: obj){
                 JSONObject jsonObject = (JSONObject) o;
                 String question = (String)jsonObject.get("question");
