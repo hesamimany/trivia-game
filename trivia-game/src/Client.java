@@ -1,8 +1,14 @@
+import JSONHandler.User;
+
 import java.io.*;
 import java.net.Socket;
+import java.util.ArrayList;
 import java.util.Scanner;
 
 public class Client {
+
+    static int clientCount = 0;
+    static ArrayList<User> Clients = Server.Client;
 
     String IP;
     int Port;
@@ -21,7 +27,7 @@ public class Client {
             readThread.start();
             WriteThread writeThread = new WriteThread(clientSocket);
             writeThread.start();
-            while (true) ;
+            while (true);
         } catch (IOException e) {
             e.printStackTrace();
         } finally {
@@ -54,10 +60,10 @@ public class Client {
         @Override
         public void run() {
 
+            Scanner scanner = new Scanner(System.in);
             try {
-                Thread.sleep(1000);
                 while (true) {
-                    Scanner scanner = new Scanner(System.in);
+                    //Thread.sleep(1000);
                     out.writeUTF(scanner.nextLine());
                     out.flush();
                 }
@@ -82,20 +88,23 @@ public class Client {
 
         @Override
         public void run() {
-            while (true) {
-                try {
+            try {
+                while (true) {
                     Thread.sleep(1000);
                     String input = in.readUTF();
                     System.out.println(input);
-                } catch (Exception e) {
-                    e.printStackTrace();
                 }
+            } catch (Exception e) {
+                e.printStackTrace();
             }
+
         }
     }
 
     public static void main(String[] args) {
+        //System.out.println("client running on port "+(int) Clients.get(clientCount).getPort());
         Client client = new Client("127.0.0.1", 5000);
+
     }
 
 

@@ -1,9 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="4b71411a-1f21-48c5-863b-2788d0054d38" name="Changes" comment="Update">
+    <list default="true" id="4b71411a-1f21-48c5-863b-2788d0054d38" name="Changes" comment="Add JSONHandler package">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/JSONReader.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/JSONReader.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Client.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Client.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/JSONHandler/JSONReader.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/JSONHandler/JSONReader.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/JSONHandler/Question.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/JSONHandler/Question.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Server.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Server.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -59,10 +62,28 @@
     <property name="project.structure.side.proportion" value="0.2" />
     <property name="settings.editor.selected.configurable" value="preferences.pluginManager" />
   </component>
-  <component name="RunManager" selected="Application.JSONReader">
+  <component name="RecentsManager">
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="C:\Users\hesam\Desktop\Net\Project\trivia-game\src\JSONHandler" />
+    </key>
+  </component>
+  <component name="RunManager" selected="Application.Server">
     <configuration name="Client" type="Application" factoryName="Application" singleton="false" temporary="true" nameIsGenerated="true">
       <option name="MAIN_CLASS_NAME" value="Client" />
       <module name="Java" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="JSONReader (1)" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
+      <option name="MAIN_CLASS_NAME" value="JSONHandler.JSONReader" />
+      <module name="Java" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="JSONHandler.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
       <method v="2">
         <option name="Make" enabled="true" />
       </method>
@@ -85,12 +106,14 @@
       <item itemvalue="Application.Client" />
       <item itemvalue="Application.Server" />
       <item itemvalue="Application.JSONReader" />
+      <item itemvalue="Application.JSONReader (1)" />
     </list>
     <recent_temporary>
       <list>
-        <item itemvalue="Application.JSONReader" />
-        <item itemvalue="Application.Client" />
         <item itemvalue="Application.Server" />
+        <item itemvalue="Application.JSONReader (1)" />
+        <item itemvalue="Application.Client" />
+        <item itemvalue="Application.JSONReader" />
       </list>
     </recent_temporary>
   </component>
@@ -112,6 +135,9 @@
       <workItem from="1672233562257" duration="4545000" />
       <workItem from="1672638922387" duration="50000" />
       <workItem from="1672740252026" duration="1211000" />
+      <workItem from="1672839189527" duration="5359000" />
+      <workItem from="1672905471612" duration="3521000" />
+      <workItem from="1672909029181" duration="563000" />
     </task>
     <task id="LOCAL-00001" summary="First commit">
       <created>1672231718312</created>
@@ -162,7 +188,14 @@
       <option name="project" value="LOCAL" />
       <updated>1672750032645</updated>
     </task>
-    <option name="localTasksCounter" value="8" />
+    <task id="LOCAL-00008" summary="Add JSONHandler package">
+      <created>1672751916090</created>
+      <option name="number" value="00008" />
+      <option name="presentableId" value="LOCAL-00008" />
+      <option name="project" value="LOCAL" />
+      <updated>1672751916090</updated>
+    </task>
+    <option name="localTasksCounter" value="9" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -186,6 +219,7 @@
     <MESSAGE value="Add writeThread and readThread" />
     <MESSAGE value="Add gitignore" />
     <MESSAGE value="Update" />
-    <option name="LAST_COMMIT_MESSAGE" value="Update" />
+    <MESSAGE value="Add JSONHandler package" />
+    <option name="LAST_COMMIT_MESSAGE" value="Add JSONHandler package" />
   </component>
 </project>

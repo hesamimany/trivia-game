@@ -24,4 +24,5 @@ public class Question {
     public long getAnswer() {
         return answer;
     }
+
 }
