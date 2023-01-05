@@ -7,11 +7,55 @@ import org.json.simple.*;
 import org.json.simple.parser.JSONParser;
 
 public class JSONReader {
+    static User Host;
+    static ArrayList<User> Clients;
+
     public static void main(String[] args) {
-        ArrayList<User> test = getUsers("users.json");
-        for(int i=0;i<test.size();i++){
-            System.out.println(test.get(i).name);
+        System.out.println(getQuestions("src/JSONHandler/questions.json").get(0).getQuestion());
+    }
+
+    public static User getHost(String fileAdd) {
+        if (Host == null) {
+            for (User u : getUsers(fileAdd)) {
+                if (u.getType().equals("host")) {
+                    Host = u;
+                    break;
+                }
+            }
         }
+        return Host;
+    }
+
+    public static ArrayList<User> getClients(String fileAdd) {
+        if (Clients == null) {
+            Clients = new ArrayList<>();
+            for (User u : getUsers(fileAdd)) {
+                if (u.getType().equals("client")) {
+                    Clients.add(u);
+                }
+            }
+        }
+        return Clients;
+    }
+
+    public static ArrayList<User> getUsers(String fileAdd) {
+        ArrayList<User> user = new ArrayList<>();
+        JSONParser parser = new JSONParser();
+        try {
+            JSONArray obj = (JSONArray) parser.parse(new FileReader(fileAdd));
+            for (Object o : obj) {
+                JSONObject jsonObject = (JSONObject) o;
+                String type = (String) jsonObject.get("type");
+                long port = (long) jsonObject.get("port");
+                String name = (String) jsonObject.get("name");
+                user.add(new User(type, port, name));
+
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return user;
     }
 
     public static ArrayList<Question> getQuestions(String fileAdd) {
@@ -41,29 +85,5 @@ public class JSONReader {
         return questions;
     }
 
-    public static ArrayList<User> getUsers(String fileAdd){
-        ArrayList<User> user = new ArrayList<>();
-        JSONParser parser = new JSONParser();
-        try {
-            JSONArray obj = (JSONArray) parser.parse(new FileReader(fileAdd));
-            for (Object o : obj) {
-                JSONObject jsonObject = (JSONObject) o;
-                String type = (String) jsonObject.get("type");
-                long port = (long) jsonObject.get("port");
-                String name = (String) jsonObject.get("name");
-                //JSONArray options = (JSONArray) jsonObject.get("options");
-                //ArrayList<String> op = new ArrayList<>();
-                /*Iterator iterator = options.iterator();
-                while (iterator.hasNext()) {
-                    op.add(iterator.next().toString());
-                }*/
-                user.add(new User(type, port, name));
 
-            }
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return user;
-    }
-    }
+}
