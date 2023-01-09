@@ -1,10 +1,11 @@
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.io.PrintStream;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.ArrayList;
-import java.util.Scanner;
+import java.nio.charset.StandardCharsets;
+import java.util.*;
 
 import JSONHandler.*;
 
@@ -14,40 +15,41 @@ public class Server {
     ServerSocket serverSocket;
     Socket server;
     ArrayList<ClientThread> threads = new ArrayList<>();
-    static ArrayList<Question> Questions;
+    static Hashtable<String, Integer> Names = new Hashtable<>();
+    static ArrayList<Question> Questions = JSONReader.getQuestions("src/JSONHandler/questions.json");
+    ;
     static ArrayList<User> Client;
     static User Host;
 
     int numClients = 0; //how many clients
     int threadID = -1; //who sent data
     boolean newGame = false; //new game started or not
-
+    PrintStream ps;
 
     public Server(int port) {
         this.Port = port;
+        ps = new PrintStream(System.out, true, StandardCharsets.UTF_8);
     }
 
     public void startConn() {
         connThread.start();
-        while (true) ;
+        while (numClients < 2) ;
+
 
     }
 
     public static void main(String[] args) {
         Client = JSONReader.getClients("src/JSONHandler/users.json");
         Host = JSONReader.getHost("src/JSONHandler/users.json");
-        Questions = JSONReader.getQuestions("src/JSONHandler/questions.json");
-        for (Question q:Questions) {
-            System.out.println(q.getQuestion());
-        }
+        //Questions = JSONReader.getQuestions("src/JSONHandler/questions.json");
+        Collections.shuffle(Questions);
         Server server = new Server((int) Host.getPort());
         server.startConn();
     }
 
     public void send(String data, int index) {
         try {
-            threads.get(index).out.writeUTF(data);
-            threads.get(index).out.flush();
+            WriteThread wt = new WriteThread(threads.get(index).socket, data);
         } catch (Exception e) {
             System.out.println("Failed to send data to client: " + index);
             e.printStackTrace();
@@ -55,12 +57,15 @@ public class Server {
     }
 
     public void sendAll(String data) {
+        String user = "";
         try {
             for (ClientThread ct : threads) {
-                ct.out.writeUTF(data);
-                ct.out.flush();
+                user = ct.username;
+                WriteThread wt = new WriteThread(ct.socket, data);
+                wt.start();
             }
         } catch (Exception e) {
+            System.out.println("Failed to send data to client: " + user);
             e.printStackTrace();
         }
     }
@@ -82,26 +87,20 @@ public class Server {
                 serverSocket = new ServerSocket(Port);
                 System.out.println("Server created on port " + Port);
 
-                int counter = 3;
+                int counter = 0;
                 while (true) {
                     ClientThread t1 = new ClientThread(serverSocket.accept());
-                    System.out.println(counter);
-                    if (counter < 4) {
+                    if (counter < Client.size()) {
                         threads.add(t1);
                         numClients++;
                         t1.start();
-                        t1.setUsername(Integer.toString(numClients - 1));
+                        t1.setNum(numClients - 1);
                         counter++;
                     }
-                    if (counter == 4) {
-                        System.out.println("hello");
+                    if (counter == Client.size()) {
                         break;
                     }
                 }
-                Thread.sleep(500);
-                System.out.println("hello again");
-                //Thread.sleep(1000);
-                //send("test",0);
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -120,17 +119,25 @@ public class Server {
 
     class ClientThread extends Thread {
         String username;
-        private Socket socket;
+        int num;
+
+        private final Socket socket;
         private ObjectInputStream in;
         private ObjectOutputStream out;
-        int score = -1;
+        int score = 0;
         int rank;
+
+        WriteThread wt;
+        ReadThread rt;
 
 
         public ClientThread(Socket socket) {
             this.socket = socket;
-            System.out.println(socket);
 
+        }
+
+        public void setNum(int num) {
+            this.num = num;
         }
 
         public void setUsername(String username) {
@@ -140,11 +147,34 @@ public class Server {
         public void run() {
 
             try {
-                System.out.println(123);
-                WriteThread wt = new WriteThread(socket);
+                connThread.join();
+                wt = new WriteThread(socket, "welcome send your name");
                 wt.start();
-                ReadThread rt = new ReadThread(socket);
+                rt = new ReadThread(socket);
                 rt.start();
+                rt.join();
+                Thread.sleep(5000);
+                System.out.println(rt.getData());
+                setUsername(rt.getData());
+                Names.put(username, num);
+
+                for (Question q : Questions) {
+                    ps.println(q.getQuestion());
+                    ps.println(q.getOptions());
+                    WriteThread wt = new WriteThread(socket, q.getQuestion() + "\n" + q.getOptions());
+                    wt.start();
+                    rt = new ReadThread(socket);
+                    rt.start();
+                    rt.join();
+                    ps.println(rt.getData());
+                    if(rt.getData().equals(Integer.toString((int)q.getAnswer()))){
+                        score++;
+                    }
+                    ps.println(score);
+                    Thread.sleep(8000);
+
+                }
+
             } catch (Exception e) {
                 System.out.println("Client: " + username + " closed");
                 for (int i = 0; i < threads.size(); i++) {
@@ -160,6 +190,7 @@ public class Server {
     class ReadThread extends Thread {
         Socket socket;
         ObjectInputStream in;
+        String data;
 
         public ReadThread(Socket socket) {
             try {
@@ -170,14 +201,14 @@ public class Server {
             }
         }
 
+        public String getData() {
+            return data;
+        }
+
         @Override
         public void run() {
             try {
-                while (true) {
-                    Thread.sleep(1000);
-                    String input = in.readUTF();
-                    System.out.println(input);
-                }
+                data = in.readUTF();
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -188,10 +219,12 @@ public class Server {
     class WriteThread extends Thread {
         Socket socket;
         ObjectOutputStream out;
+        String data;
 
-        public WriteThread(Socket socket) {
+        public WriteThread(Socket socket, String data) {
             try {
                 this.socket = socket;
+                this.data = data;
                 out = new ObjectOutputStream(socket.getOutputStream());
             } catch (Exception e) {
                 e.printStackTrace();
@@ -202,12 +235,8 @@ public class Server {
         public void run() {
 
             try {
-                Scanner scanner = new Scanner(System.in);
-                while (true) {
-                    //Thread.sleep(1000);
-                    out.writeUTF(scanner.nextLine());
-                    out.flush();
-                }
+                out.writeUTF(data);
+                out.flush();
             } catch (Exception e) {
                 e.printStackTrace();
             }

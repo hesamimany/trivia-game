@@ -2,13 +2,19 @@ import JSONHandler.User;
 
 import java.io.*;
 import java.net.Socket;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Scanner;
 
 public class Client {
 
+    static PrintStream ps;
+
     static int clientCount = 0;
     static ArrayList<User> Clients = Server.Client;
+
+    public WriteThread wt;
+    public ReadThread rt;
 
     String IP;
     int Port;
@@ -22,13 +28,31 @@ public class Client {
         Port = port;
 
         try {
+            ps = new PrintStream(System.out, true, StandardCharsets.UTF_8);
             clientSocket = new Socket(IP, port);
-            ReadThread readThread = new ReadThread(clientSocket);
-            readThread.start();
-            WriteThread writeThread = new WriteThread(clientSocket);
-            writeThread.start();
-            while (true);
-        } catch (IOException e) {
+            rt = new ReadThread(clientSocket);
+            rt.start();
+            rt.join();
+            ps.println(rt.getData());
+
+
+            wt = new WriteThread(clientSocket);
+            wt.start();
+            wt.join();
+            int counter = Server.Questions.size();
+            while (counter != 0) {
+                rt = new ReadThread(clientSocket);
+                rt.start();
+                rt.join();
+                ps.println(rt.getData());
+                wt = new WriteThread(clientSocket);
+                wt.start();
+                wt.join();
+
+            }
+
+
+        } catch (Exception e) {
             e.printStackTrace();
         } finally {
             try {
@@ -59,15 +83,14 @@ public class Client {
 
         @Override
         public void run() {
-
-            Scanner scanner = new Scanner(System.in);
             try {
-                while (true) {
-                    //Thread.sleep(1000);
-                    out.writeUTF(scanner.nextLine());
-                    out.flush();
-                }
-            } catch (Exception e) {
+                Scanner scanner = new Scanner(System.in);
+
+                //while (true) {
+                out.writeUTF(scanner.nextLine());
+                out.flush();
+                //}
+            } catch (IOException e) {
                 e.printStackTrace();
             }
         }
@@ -76,6 +99,7 @@ public class Client {
     class ReadThread extends Thread {
         Socket socket;
         ObjectInputStream in;
+        String data = null;
 
         public ReadThread(Socket socket) {
             try {
@@ -86,14 +110,14 @@ public class Client {
             }
         }
 
+        public String getData() {
+            return data;
+        }
+
         @Override
         public void run() {
             try {
-                while (true) {
-                    Thread.sleep(1000);
-                    String input = in.readUTF();
-                    System.out.println(input);
-                }
+                while (getData() == null) data = in.readUTF();
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -102,8 +126,7 @@ public class Client {
     }
 
     public static void main(String[] args) {
-        //System.out.println("client running on port "+(int) Clients.get(clientCount).getPort());
-        Client client = new Client("127.0.0.1", 5000);
+        Client client = new Client("127.0.0.1", 8080);
 
     }
 
