@@ -4,7 +4,11 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
+<<<<<<< Updated upstream
     <list default="true" id="4b71411a-1f21-48c5-863b-2788d0054d38" name="Changes" comment="Reading from JSON" />
+=======
+    <list default="true" id="4b71411a-1f21-48c5-863b-2788d0054d38" name="Changes" comment="Add JSONHandler package" />
+>>>>>>> Stashed changes
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -42,10 +46,30 @@
   </component>
   <component name="PropertiesComponent"><![CDATA[{
   "keyToString": {
+<<<<<<< Updated upstream
     "node.js.selected.package.tslint": "(autodetect)"
   }
 }]]></component>
   <component name="RunManager" selected="Application.Client">
+=======
+    "RunOnceActivity.OpenProjectViewOnStart": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "WebServerToolWindowFactoryState": "false",
+    "last_opened_file_path": "G:/Ghazal/Semester5/Computer Networks.Ahangari/project/quiz/trivia-game/trivia-game",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "vue.rearranger.settings.migration": "true"
+  }
+}]]></component>
+  <component name="RecentsManager">
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="C:\Users\hesam\Desktop\Net\Project\trivia-game\src\JSONHandler" />
+    </key>
+  </component>
+  <component name="RunManager" selected="Application.Time">
+>>>>>>> Stashed changes
     <configuration name="Client" type="Application" factoryName="Application" singleton="false" temporary="true" nameIsGenerated="true">
       <option name="MAIN_CLASS_NAME" value="Client" />
       <module name="Java" />
@@ -73,13 +97,27 @@
         <option name="Make" enabled="true" />
       </method>
     </configuration>
+    <configuration name="Time" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
+      <option name="MAIN_CLASS_NAME" value="Time" />
+      <module name="Java" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
     <list>
+      <item itemvalue="Application.Time" />
       <item itemvalue="Application.Client" />
       <item itemvalue="Application.Server" />
       <item itemvalue="Application.JSONReader" />
     </list>
     <recent_temporary>
       <list>
+<<<<<<< Updated upstream
+=======
+        <item itemvalue="Application.Time" />
+        <item itemvalue="Application.JSONReader (1)" />
+        <item itemvalue="Application.Server" />
+>>>>>>> Stashed changes
         <item itemvalue="Application.Client" />
         <item itemvalue="Application.Server" />
         <item itemvalue="Application.JSONReader" />
@@ -104,8 +142,16 @@
       <workItem from="1672233562257" duration="4545000" />
       <workItem from="1672638922387" duration="50000" />
       <workItem from="1672740252026" duration="1211000" />
+<<<<<<< Updated upstream
       <workItem from="1673113445517" duration="7410000" />
       <workItem from="1673121138077" duration="7759000" />
+=======
+      <workItem from="1672839189527" duration="5359000" />
+      <workItem from="1672905471612" duration="3521000" />
+      <workItem from="1672909029181" duration="563000" />
+      <workItem from="1672912557756" duration="943000" />
+      <workItem from="1673258790151" duration="1247000" />
+>>>>>>> Stashed changes
     </task>
     <task id="LOCAL-00001" summary="First commit">
       <created>1672231718312</created>
