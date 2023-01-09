@@ -159,19 +159,22 @@ public class Server {
                 Names.put(username, num);
 
                 for (Question q : Questions) {
-                    ps.println(q.getQuestion());
-                    ps.println(q.getOptions());
-                    WriteThread wt = new WriteThread(socket, q.getQuestion() + "\n" + q.getOptions());
+                    ps.println(q.getQuestion()); // test
+                    ps.println(q.getOptions());  // test
+
+                    wt = new WriteThread(socket, q.getQuestion() + "\n" + q.getOptions()); // question
                     wt.start();
-                    rt = new ReadThread(socket);
+
+                    rt = new ReadThread(socket); // answer
                     rt.start();
                     rt.join();
                     ps.println(rt.getData());
+
                     if(rt.getData().equals(Integer.toString((int)q.getAnswer()))){
-                        score++;
+                        score++; // update scoreboard
                     }
-                    ps.println(score);
-                    Thread.sleep(8000);
+                    ps.println(score); // test
+                    Thread.sleep(8000); // wait for next question
 
                 }
 

@@ -41,14 +41,20 @@ public class Client {
             wt.join();
             int counter = Server.Questions.size();
             while (counter != 0) {
-                rt = new ReadThread(clientSocket);
+                rt = new ReadThread(clientSocket); // question
                 rt.start();
                 rt.join();
                 ps.println(rt.getData());
-                wt = new WriteThread(clientSocket);
+
+                wt = new WriteThread(clientSocket); // answer
                 wt.start();
                 wt.join();
 
+                rt = new ReadThread(clientSocket); // scoreboard
+                rt.join();
+                ps.println(rt.getData());
+
+                counter--; // next question
             }
 
 
@@ -85,12 +91,9 @@ public class Client {
         public void run() {
             try {
                 Scanner scanner = new Scanner(System.in);
-
-                //while (true) {
                 out.writeUTF(scanner.nextLine());
                 out.flush();
-                //}
-            } catch (IOException e) {
+            } catch (Exception e) {
                 e.printStackTrace();
             }
         }
