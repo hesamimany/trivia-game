@@ -40,6 +40,7 @@ public class Client {
             wt.start();
             wt.join();
             int counter = Server.Questions.size();
+            ps.println(clientSocket);
             while (counter != 0) {
                 rt = new ReadThread(clientSocket); // question
                 rt.start();
@@ -51,6 +52,7 @@ public class Client {
                 wt.join();
 
                 rt = new ReadThread(clientSocket); // scoreboard
+                rt.start();
                 rt.join();
                 ps.println(rt.getData());
 
@@ -120,7 +122,7 @@ public class Client {
         @Override
         public void run() {
             try {
-                while (getData() == null) data = in.readUTF();
+                data = in.readUTF();
             } catch (Exception e) {
                 e.printStackTrace();
             }

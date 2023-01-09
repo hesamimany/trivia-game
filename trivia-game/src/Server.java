@@ -16,6 +16,7 @@ public class Server {
     Socket server;
     ArrayList<ClientThread> threads = new ArrayList<>();
     static Hashtable<String, Integer> Names = new Hashtable<>();
+    static Hashtable<String, Integer> Scores= new Hashtable<>();
     static ArrayList<Question> Questions = JSONReader.getQuestions("src/JSONHandler/questions.json");
     ;
     static ArrayList<User> Client;
@@ -157,13 +158,15 @@ public class Server {
                 System.out.println(rt.getData());
                 setUsername(rt.getData());
                 Names.put(username, num);
+                Scores.put(username, score);
 
                 for (Question q : Questions) {
                     ps.println(q.getQuestion()); // test
                     ps.println(q.getOptions());  // test
-
-                    wt = new WriteThread(socket, q.getQuestion() + "\n" + q.getOptions()); // question
+                    Thread.sleep(500);
+                    wt = new WriteThread(socket, q.getQuestion() + "\n" + Arrays.toString(q.getOptions().toArray())); // question
                     wt.start();
+                    wt.join();
 
                     rt = new ReadThread(socket); // answer
                     rt.start();
@@ -172,9 +175,14 @@ public class Server {
 
                     if(rt.getData().equals(Integer.toString((int)q.getAnswer()))){
                         score++; // update scoreboard
+                        Scores.replace(username, score);
                     }
                     ps.println(score); // test
-                    Thread.sleep(8000); // wait for next question
+                    Thread.sleep(15000); // wait for next question
+
+                    wt = new WriteThread(socket,Scores.toString());
+                    wt.start();
+                    wt.join();
 
                 }
 

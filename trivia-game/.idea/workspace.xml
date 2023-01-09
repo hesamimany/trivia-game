@@ -1,14 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
-  <component name="AutoImportSettings">
-    <option name="autoReloadType" value="SELECTIVE" />
-  </component>
   <component name="ChangeListManager">
-<<<<<<< Updated upstream
-    <list default="true" id="4b71411a-1f21-48c5-863b-2788d0054d38" name="Changes" comment="Reading from JSON" />
-=======
-    <list default="true" id="4b71411a-1f21-48c5-863b-2788d0054d38" name="Changes" comment="Add JSONHandler package" />
->>>>>>> Stashed changes
+    <list default="true" id="4b71411a-1f21-48c5-863b-2788d0054d38" name="Changes" comment="Comments">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Client.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Client.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Server.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Server.java" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -44,32 +41,19 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-<<<<<<< Updated upstream
-    "node.js.selected.package.tslint": "(autodetect)"
-  }
-}]]></component>
-  <component name="RunManager" selected="Application.Client">
-=======
-    "RunOnceActivity.OpenProjectViewOnStart": "true",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "WebServerToolWindowFactoryState": "false",
-    "last_opened_file_path": "G:/Ghazal/Semester5/Computer Networks.Ahangari/project/quiz/trivia-game/trivia-game",
-    "node.js.detected.package.eslint": "true",
-    "node.js.detected.package.tslint": "true",
-    "node.js.selected.package.eslint": "(autodetect)",
-    "node.js.selected.package.tslint": "(autodetect)",
-    "vue.rearranger.settings.migration": "true"
-  }
-}]]></component>
-  <component name="RecentsManager">
-    <key name="MoveFile.RECENT_KEYS">
-      <recent name="C:\Users\hesam\Desktop\Net\Project\trivia-game\src\JSONHandler" />
-    </key>
+  <component name="PropertiesComponent">
+    <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
+    <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
+    <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
+    <property name="WebServerToolWindowFactoryState" value="false" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/src/JSONHandler" />
+    <property name="nodejs_package_manager_path" value="npm" />
+    <property name="project.structure.last.edited" value="Libraries" />
+    <property name="project.structure.proportion" value="0.15" />
+    <property name="project.structure.side.proportion" value="0.2" />
+    <property name="settings.editor.selected.configurable" value="File.Encoding" />
   </component>
-  <component name="RunManager" selected="Application.Time">
->>>>>>> Stashed changes
+  <component name="RunManager" selected="Application.Client">
     <configuration name="Client" type="Application" factoryName="Application" singleton="false" temporary="true" nameIsGenerated="true">
       <option name="MAIN_CLASS_NAME" value="Client" />
       <module name="Java" />
@@ -97,27 +81,13 @@
         <option name="Make" enabled="true" />
       </method>
     </configuration>
-    <configuration name="Time" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
-      <option name="MAIN_CLASS_NAME" value="Time" />
-      <module name="Java" />
-      <method v="2">
-        <option name="Make" enabled="true" />
-      </method>
-    </configuration>
     <list>
-      <item itemvalue="Application.Time" />
       <item itemvalue="Application.Client" />
       <item itemvalue="Application.Server" />
       <item itemvalue="Application.JSONReader" />
     </list>
     <recent_temporary>
       <list>
-<<<<<<< Updated upstream
-=======
-        <item itemvalue="Application.Time" />
-        <item itemvalue="Application.JSONReader (1)" />
-        <item itemvalue="Application.Server" />
->>>>>>> Stashed changes
         <item itemvalue="Application.Client" />
         <item itemvalue="Application.Server" />
         <item itemvalue="Application.JSONReader" />
@@ -142,16 +112,9 @@
       <workItem from="1672233562257" duration="4545000" />
       <workItem from="1672638922387" duration="50000" />
       <workItem from="1672740252026" duration="1211000" />
-<<<<<<< Updated upstream
       <workItem from="1673113445517" duration="7410000" />
       <workItem from="1673121138077" duration="7759000" />
-=======
-      <workItem from="1672839189527" duration="5359000" />
-      <workItem from="1672905471612" duration="3521000" />
-      <workItem from="1672909029181" duration="563000" />
-      <workItem from="1672912557756" duration="943000" />
-      <workItem from="1673258790151" duration="1247000" />
->>>>>>> Stashed changes
+      <workItem from="1673258483737" duration="4097000" />
     </task>
     <task id="LOCAL-00001" summary="First commit">
       <created>1672231718312</created>
@@ -181,7 +144,21 @@
       <option name="project" value="LOCAL" />
       <updated>1672234131958</updated>
     </task>
-    <option name="localTasksCounter" value="5" />
+    <task id="LOCAL-00005" summary="Sending questions and receiving answers">
+      <created>1673258624236</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1673258624236</updated>
+    </task>
+    <task id="LOCAL-00006" summary="Comments">
+      <created>1673259208529</created>
+      <option name="number" value="00006" />
+      <option name="presentableId" value="LOCAL-00006" />
+      <option name="project" value="LOCAL" />
+      <updated>1673259208529</updated>
+    </task>
+    <option name="localTasksCounter" value="7" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -202,6 +179,8 @@
     <MESSAGE value="First commit" />
     <MESSAGE value="first commit" />
     <MESSAGE value="test" />
-    <option name="LAST_COMMIT_MESSAGE" value="test" />
+    <MESSAGE value="Sending questions and receiving answers" />
+    <MESSAGE value="Comments" />
+    <option name="LAST_COMMIT_MESSAGE" value="Comments" />
   </component>
 </project>
