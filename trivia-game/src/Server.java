@@ -1,4 +1,3 @@
-import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.PrintStream;
@@ -14,16 +13,14 @@ public class Server {
     ConnThread connThread = new ConnThread();
     ServerSocket serverSocket;
     Socket server;
-    ArrayList<ClientThread> threads = new ArrayList<>();
+    static ArrayList<ClientThread> threads = new ArrayList<>();
     static Hashtable<String, Integer> Names = new Hashtable<>();
-    static Hashtable<String, Integer> Scores= new Hashtable<>();
+    static Hashtable<String, Integer> Scores = new Hashtable<>();
     static ArrayList<Question> Questions = JSONReader.getQuestions("src/JSONHandler/questions.json");
-    ;
-    static ArrayList<User> Client;
-    static User Host;
+    static ArrayList<User> Clients = JSONReader.getClients("src/JSONHandler/users.json");
+    static User Host = JSONReader.getHost("src/JSONHandler/users.json");
 
-    int numClients = 0; //how many clients
-    int threadID = -1; //who sent data
+    static int numClients = 0; //how many clients
     boolean newGame = false; //new game started or not
     PrintStream ps;
 
@@ -34,41 +31,13 @@ public class Server {
 
     public void startConn() {
         connThread.start();
-        while (numClients < 2) ;
-
 
     }
 
     public static void main(String[] args) {
-        Client = JSONReader.getClients("src/JSONHandler/users.json");
-        Host = JSONReader.getHost("src/JSONHandler/users.json");
-        //Questions = JSONReader.getQuestions("src/JSONHandler/questions.json");
         Collections.shuffle(Questions);
         Server server = new Server((int) Host.getPort());
         server.startConn();
-    }
-
-    public void send(String data, int index) {
-        try {
-            WriteThread wt = new WriteThread(threads.get(index).socket, data);
-        } catch (Exception e) {
-            System.out.println("Failed to send data to client: " + index);
-            e.printStackTrace();
-        }
-    }
-
-    public void sendAll(String data) {
-        String user = "";
-        try {
-            for (ClientThread ct : threads) {
-                user = ct.username;
-                WriteThread wt = new WriteThread(ct.socket, data);
-                wt.start();
-            }
-        } catch (Exception e) {
-            System.out.println("Failed to send data to client: " + user);
-            e.printStackTrace();
-        }
     }
 
     public void closeConn() throws Exception {
@@ -90,15 +59,16 @@ public class Server {
 
                 int counter = 0;
                 while (true) {
+
                     ClientThread t1 = new ClientThread(serverSocket.accept());
-                    if (counter < Client.size()) {
+                    if (counter < Clients.size()) {
                         threads.add(t1);
-                        numClients++;
+                        counter++;
+                        numClients = counter;
                         t1.start();
                         t1.setNum(numClients - 1);
-                        counter++;
                     }
-                    if (counter == Client.size()) {
+                    if (counter == Clients.size()) {
                         break;
                     }
                 }
@@ -128,13 +98,8 @@ public class Server {
         int score = 0;
         int rank;
 
-        WriteThread wt;
-        ReadThread rt;
-
-
         public ClientThread(Socket socket) {
             this.socket = socket;
-
         }
 
         public void setNum(int num) {
@@ -145,111 +110,103 @@ public class Server {
             this.username = username;
         }
 
-        public void run() {
-
+        public void sendTo(String data, int index) {
             try {
-                connThread.join();
-                wt = new WriteThread(socket, "welcome send your name");
-                wt.start();
-                rt = new ReadThread(socket);
-                rt.start();
-                rt.join();
-                Thread.sleep(5000);
-                System.out.println(rt.getData());
-                setUsername(rt.getData());
-                Names.put(username, num);
-                Scores.put(username, score);
-
-                for (Question q : Questions) {
-                    ps.println(q.getQuestion()); // test
-                    ps.println(q.getOptions());  // test
-                    Thread.sleep(500);
-                    wt = new WriteThread(socket, q.getQuestion() + "\n" + Arrays.toString(q.getOptions().toArray())); // question
-                    wt.start();
-                    wt.join();
-
-                    rt = new ReadThread(socket); // answer
-                    rt.start();
-                    rt.join();
-                    ps.println(rt.getData());
-
-                    if(rt.getData().equals(Integer.toString((int)q.getAnswer()))){
-                        score++; // update scoreboard
-                        Scores.replace(username, score);
-                    }
-                    ps.println(score); // test
-                    Thread.sleep(15000); // wait for next question
-
-                    wt = new WriteThread(socket,Scores.toString());
-                    wt.start();
-                    wt.join();
-
-                }
-
+                threads.get(index).send(data);
             } catch (Exception e) {
-                System.out.println("Client: " + username + " closed");
-                for (int i = 0; i < threads.size(); i++) {
-                    if (!threads.get(i).socket.isClosed()) {
-                        send("Client disconnected", i);
-                    }
-                }
-            }
-        }
-    }
-
-
-    class ReadThread extends Thread {
-        Socket socket;
-        ObjectInputStream in;
-        String data;
-
-        public ReadThread(Socket socket) {
-            try {
-                this.socket = socket;
-                in = new ObjectInputStream(socket.getInputStream());
-            } catch (Exception e) {
+                System.out.println("Failed to send data to client: " + threads.get(index).username);
                 e.printStackTrace();
             }
         }
 
-        public String getData() {
-            return data;
-        }
-
-        @Override
-        public void run() {
-            try {
-                data = in.readUTF();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-
-        }
-    }
-
-    class WriteThread extends Thread {
-        Socket socket;
-        ObjectOutputStream out;
-        String data;
-
-        public WriteThread(Socket socket, String data) {
-            try {
-                this.socket = socket;
-                this.data = data;
-                out = new ObjectOutputStream(socket.getOutputStream());
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-
-        @Override
-        public void run() {
-
+        public void send(String data) {
             try {
                 out.writeUTF(data);
                 out.flush();
             } catch (Exception e) {
+                System.out.println("Failed to send data to client: " + username);
                 e.printStackTrace();
+            }
+        }
+
+        public void run() {
+
+            try {
+                connThread.join();
+
+                out = new ObjectOutputStream(socket.getOutputStream());
+                send("welcome send your name");
+
+                in = new ObjectInputStream(socket.getInputStream());
+
+                long startTime = System.currentTimeMillis();
+                String clientUsername = in.readUTF(); // username
+                long endTime = System.currentTimeMillis();
+
+                setUsername(clientUsername);
+
+                Names.put(username, num);
+                Scores.put(username, score);
+
+                Thread.sleep(11000 - (endTime - startTime));
+                for (Question q : Questions) {
+                    ps.println(q.getQuestion()); // test
+                    ps.println(q.getOptions());  // test
+
+                    send(q.getQuestion() + "\n" + Arrays.toString(q.getOptions().toArray()));
+
+                    startTime = System.currentTimeMillis();
+                    String answer = in.readUTF(); // answer
+                    endTime = System.currentTimeMillis();
+                    ps.println(username + ":" + answer);
+
+                    if (answer.equals(Integer.toString((int) q.getAnswer()))) { // check answer
+                        score++;
+                        Scores.replace(username, score); // update scoreboard
+                    }
+
+                    Thread.sleep(16000 - (endTime - startTime));
+
+                    send(Scores.toString()); // scoreboard
+
+                    Thread.sleep(2000);
+
+                    StringBuilder otherUsers = new StringBuilder();
+                    for (ClientThread ct : threads) {
+                        if (ct != this) otherUsers.append(ct.username).append(", ");
+                    }
+                    otherUsers.delete(otherUsers.length() - 2, otherUsers.length() - 1);
+
+
+                    long chatStartTime = System.currentTimeMillis();
+                    send(String.format("Chat time! use {Target-username:Message} syntax\n"));
+                    do {
+                        send(String.format("available usernames are \n%s",otherUsers));
+                        System.out.println(System.currentTimeMillis() - chatStartTime);
+
+                        startTime = System.currentTimeMillis();
+                        String Message = in.readUTF();
+                        endTime = System.currentTimeMillis();
+
+                        System.out.println(Message);
+
+                        if (10100 - (endTime - startTime) > 0) Thread.sleep(10100 - (endTime - startTime));
+
+                        String[] split = Message.split(":");
+
+                        if (split.length == 2) {
+                            sendTo(split[1], Names.get(split[0]));
+                        }
+                    } while (System.currentTimeMillis() - chatStartTime < 30000);
+                    send("end chat");
+                }
+            } catch (Exception e) {
+                System.out.println("Client: " + username + " closed");
+                for (int i = 0; i < threads.size(); i++) {
+                    if (!threads.get(i).socket.isClosed()) {
+                        sendTo("Client disconnected", i);
+                    }
+                }
             }
         }
     }

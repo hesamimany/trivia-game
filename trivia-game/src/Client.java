@@ -1,3 +1,4 @@
+import ConsoleInputHandler.ConsoleReadThread;
 import JSONHandler.User;
 
 import java.io.*;
@@ -10,11 +11,10 @@ public class Client {
 
     static PrintStream ps;
 
-    static int clientCount = 0;
-    static ArrayList<User> Clients = Server.Client;
+    static ArrayList<User> Clients = Server.Clients;
+    int clientNum;
 
-    public WriteThread wt;
-    public ReadThread rt;
+    String Username;
 
     String IP;
     int Port;
@@ -23,42 +23,70 @@ public class Client {
     ObjectInputStream in;
     ObjectOutputStream out;
 
+    ConsoleReadThread read;
+
     public Client(String IP, int port) {
         this.IP = IP;
         Port = port;
+    }
 
+    public void send(String data) {
+        try {
+            out.writeUTF(data);
+            out.flush();
+        } catch (Exception e) {
+            System.out.println("Failed to send data to server");
+            e.printStackTrace();
+        }
+    }
+
+    public void StartClient() {
         try {
             ps = new PrintStream(System.out, true, StandardCharsets.UTF_8);
-            clientSocket = new Socket(IP, port);
-            rt = new ReadThread(clientSocket);
-            rt.start();
-            rt.join();
-            ps.println(rt.getData());
+            clientSocket = new Socket(IP, Port);
+            in = new ObjectInputStream(clientSocket.getInputStream());
+            ps.println(in.readUTF());
 
 
-            wt = new WriteThread(clientSocket);
-            wt.start();
-            wt.join();
+            out = new ObjectOutputStream(clientSocket.getOutputStream());
+            read = new ConsoleReadThread(10);
+            read.start();
+            read.join();
+            String username = read.getData();
+            if (username == null) username = Server.Clients.get(clientNum).getName();
+            Username = username;
+            send(username); // username
+
             int counter = Server.Questions.size();
-            ps.println(clientSocket);
             while (counter != 0) {
-                rt = new ReadThread(clientSocket); // question
-                rt.start();
-                rt.join();
-                ps.println(rt.getData());
+                ps.println(in.readUTF()); // question
 
-                wt = new WriteThread(clientSocket); // answer
-                wt.start();
-                wt.join();
+                read = new ConsoleReadThread(15);
+                read.start();
+                read.join();
+                String answer = read.getData();
+                if (answer == null) answer = "0";
+                send(answer); // answer
 
-                rt = new ReadThread(clientSocket); // scoreboard
-                rt.start();
-                rt.join();
-                ps.println(rt.getData());
+                ps.println(in.readUTF()); // scoreboard
 
-                counter--; // next question
+                ChatHandler chat = new ChatHandler();
+                chat.start();
+                long startTime = System.currentTimeMillis();
+                do {
+                    long beforeReadTime = System.currentTimeMillis();
+                    read = new ConsoleReadThread(10);
+                    read.start();
+                    read.join();
+                    Thread.sleep(10500 - (System.currentTimeMillis() - beforeReadTime));
+                    String send = read.getData();
+                    if (send == null) send = "";
+                    send(send);
+                    //System.out.println(System.currentTimeMillis() - startTime);
+                } while (System.currentTimeMillis() - startTime < 30000);
+                chat.join();
+                counter--;
             }
-
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -73,67 +101,28 @@ public class Client {
             } catch (IOException e) {
                 e.printStackTrace();
             }
+
         }
     }
 
-    class WriteThread extends Thread {
-        Socket socket;
-        ObjectOutputStream out;
-
-        public WriteThread(Socket socket) {
-            try {
-                this.socket = socket;
-                out = new ObjectOutputStream(socket.getOutputStream());
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-
+    class ChatHandler extends Thread {
         @Override
         public void run() {
-            try {
-                Scanner scanner = new Scanner(System.in);
-                out.writeUTF(scanner.nextLine());
-                out.flush();
-            } catch (Exception e) {
-                e.printStackTrace();
+            while (true) {
+                try {
+                    String input = in.readUTF();
+                    if (input.equalsIgnoreCase("end chat")) break;
+                    ps.println(input);
+
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             }
-        }
-    }
-
-    class ReadThread extends Thread {
-        Socket socket;
-        ObjectInputStream in;
-        String data = null;
-
-        public ReadThread(Socket socket) {
-            try {
-                this.socket = socket;
-                in = new ObjectInputStream(socket.getInputStream());
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-
-        public String getData() {
-            return data;
-        }
-
-        @Override
-        public void run() {
-            try {
-                data = in.readUTF();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-
         }
     }
 
     public static void main(String[] args) {
         Client client = new Client("127.0.0.1", 8080);
-
+        client.StartClient();
     }
-
-
 }
