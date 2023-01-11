@@ -12,15 +12,6 @@ public class JSONReader {
     static User Host;
     static ArrayList<User> Clients;
 
-    public static void main(String[] args) throws UnsupportedEncodingException {
-        ArrayList<Question> questions = getQuestions("src/JSONHandler/questions.json");
-        System.out.println(questions.get(0).getQuestion());
-        Collections.shuffle(questions);
-        PrintStream ps = new PrintStream(System.out, true, StandardCharsets.UTF_8);
-        ps.println(questions.get(0).getQuestion());
-    }
-
-
     public static User getHost(String fileAdd) {
         if (Host == null) {
             for (User u : getUsers(fileAdd)) {
