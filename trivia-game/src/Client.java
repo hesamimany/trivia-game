@@ -5,6 +5,8 @@ import java.io.*;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class Client { //TODO add gui
 
@@ -68,8 +70,12 @@ public class Client { //TODO add gui
                 read.start();
                 read.join();
                 String answer = read.getData();
-                if (answer == null){
+                if (answer == null) {
                     System.out.println("Timeout no answer");
+                    answer = "0";
+                }
+                if (!Pattern.matches("[1-4]", answer)) {
+                    System.out.println("Wrong input value");
                     answer = "0";
                 }
                 send(answer); // answer

@@ -7,6 +7,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 import JSONHandler.*;
+import com.sun.source.tree.SynchronizedTree;
 
 public class Server { //TODO add gui
     int Port;
@@ -155,12 +156,12 @@ public class Server { //TODO add gui
 
                     StringBuilder stringBuilder = new StringBuilder();
                     int i = 1;
-                    for (String s:q.getOptions()) {
+                    for (String s : q.getOptions()) {
                         stringBuilder.append(i).append(". ").append(s).append("\n");
                         i++;
                     }
-                    stringBuilder.deleteCharAt(stringBuilder.length()-1);
-                    send(String.format("%20s@%5s",q.getQuestion(),stringBuilder));
+                    stringBuilder.deleteCharAt(stringBuilder.length() - 1);
+                    send(String.format("%20s@%5s", q.getQuestion(), stringBuilder));
 
                     startTime = System.currentTimeMillis();
                     String answer = in.readUTF(); // answer
@@ -174,7 +175,21 @@ public class Server { //TODO add gui
 
                     Thread.sleep(16000 - (endTime - startTime));
 
-                    send(scores.toString()); // scoreboard
+                    StringBuilder sb = new StringBuilder();
+                    List<String> listKeys = new ArrayList<String>(scores.keySet());
+                    Object[] list = listKeys.toArray();
+                    Arrays.sort(list, (o1, o2) -> scores.get((String) o2) - scores.get((String) o1));
+                    System.out.println(Arrays.toString(list));
+                    for (Object o : list) {
+                        String name = (String) o;
+                        if (name.equals(username)) {
+                            sb.append("YOU").append(": ").append(scores.get(name)).append("\n");
+                            continue;
+                        }
+                        sb.append(name).append(": ").append(scores.get(name)).append("\n");
+                    }
+                    sb.deleteCharAt(sb.length() - 1);
+                    send(sb.toString()); // scoreboard
 
                     Thread.sleep(2000);
 
