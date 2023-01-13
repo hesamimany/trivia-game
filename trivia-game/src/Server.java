@@ -8,17 +8,17 @@ import java.util.*;
 
 import JSONHandler.*;
 
-public class Server {
+public class Server { //TODO add gui
     int Port;
     ConnThread connThread = new ConnThread();
     ServerSocket serverSocket;
     Socket server;
     static ArrayList<ClientThread> threads = new ArrayList<>();
-    static Hashtable<String, Integer> Names = new Hashtable<>();
-    static Hashtable<String, Integer> Scores = new Hashtable<>();
-    static ArrayList<Question> Questions = JSONReader.getQuestions("src/JSONHandler/questions.json");
-    static ArrayList<User> Clients = JSONReader.getClients("src/JSONHandler/users.json");
-    static User Host = JSONReader.getHost("src/JSONHandler/users.json");
+    static Hashtable<String, Integer> names = new Hashtable<>();
+    static Hashtable<String, Integer> scores = new Hashtable<>();
+    static ArrayList<Question> questions = JSONReader.getQuestions("src/JSONHandler/questions.json");
+    static ArrayList<User> clients = JSONReader.getClients("src/JSONHandler/users.json");
+    static User host = JSONReader.getHost("src/JSONHandler/users.json");
 
     static int numClients = 0; //how many clients
     boolean newGame = false; //new game started or not
@@ -35,8 +35,8 @@ public class Server {
     }
 
     public static void main(String[] args) {
-        Collections.shuffle(Questions);
-        Server server = new Server((int) Host.getPort());
+        Collections.shuffle(questions);
+        Server server = new Server((int) host.getPort());
         server.startConn();
     }
 
@@ -61,14 +61,14 @@ public class Server {
                 while (true) {
 
                     ClientThread t1 = new ClientThread(serverSocket.accept());
-                    if (counter < Clients.size()) {
+                    if (counter < clients.size()) {
                         threads.add(t1);
                         counter++;
                         numClients = counter;
                         t1.start();
                         t1.setNum(numClients - 1);
                     }
-                    if (counter == Clients.size()) {
+                    if (counter == clients.size()) {
                         break;
                     }
                 }
@@ -82,10 +82,10 @@ public class Server {
             try {
                 serverSocket.close();
             } catch (Exception e) {
+                System.out.println("Server is closed");
+                e.printStackTrace();
             }
         }
-
-
     }
 
     class ClientThread extends Thread {
@@ -135,7 +135,7 @@ public class Server {
                 connThread.join();
 
                 out = new ObjectOutputStream(socket.getOutputStream());
-                send("welcome send your name");
+                send(String.format("welcome send your name@%s", clients.get(num).getName()));
 
                 in = new ObjectInputStream(socket.getInputStream());
 
@@ -145,15 +145,22 @@ public class Server {
 
                 setUsername(clientUsername);
 
-                Names.put(username, num);
-                Scores.put(username, score);
+                names.put(username, num);
+                scores.put(username, score);
 
                 Thread.sleep(11000 - (endTime - startTime));
-                for (Question q : Questions) {
+                for (Question q : questions) {
                     ps.println(q.getQuestion()); // test
                     ps.println(q.getOptions());  // test
 
-                    send(q.getQuestion() + "\n" + Arrays.toString(q.getOptions().toArray()));
+                    StringBuilder stringBuilder = new StringBuilder();
+                    int i = 1;
+                    for (String s:q.getOptions()) {
+                        stringBuilder.append(i).append(". ").append(s).append("\n");
+                        i++;
+                    }
+                    stringBuilder.deleteCharAt(stringBuilder.length()-1);
+                    send(String.format("%20s@%5s",q.getQuestion(),stringBuilder));
 
                     startTime = System.currentTimeMillis();
                     String answer = in.readUTF(); // answer
@@ -162,12 +169,12 @@ public class Server {
 
                     if (answer.equals(Integer.toString((int) q.getAnswer()))) { // check answer
                         score++;
-                        Scores.replace(username, score); // update scoreboard
+                        scores.replace(username, score); // update scoreboard
                     }
 
                     Thread.sleep(16000 - (endTime - startTime));
 
-                    send(Scores.toString()); // scoreboard
+                    send(scores.toString()); // scoreboard
 
                     Thread.sleep(2000);
 
@@ -179,9 +186,9 @@ public class Server {
 
 
                     long chatStartTime = System.currentTimeMillis();
-                    send(String.format("Chat time! use {Target-username:Message} syntax\n"));
+                    send("Chat time! use {Target-username:Message} syntax\n");
                     do {
-                        send(String.format("available usernames are \n%s",otherUsers));
+                        send(String.format("available usernames are \n%s", otherUsers));
                         System.out.println(System.currentTimeMillis() - chatStartTime);
 
                         startTime = System.currentTimeMillis();
@@ -194,19 +201,18 @@ public class Server {
 
                         String[] split = Message.split(":");
 
+                        System.out.println(Arrays.toString(split));
+                        System.out.println(names.get(split[0]));
+
                         if (split.length == 2) {
-                            sendTo(split[1], Names.get(split[0]));
+                            sendTo("Message from " + username + ": " + split[1], names.get(split[0]));
                         }
                     } while (System.currentTimeMillis() - chatStartTime < 30000);
                     send("end chat");
                 }
             } catch (Exception e) {
                 System.out.println("Client: " + username + " closed");
-                for (int i = 0; i < threads.size(); i++) {
-                    if (!threads.get(i).socket.isClosed()) {
-                        sendTo("Client disconnected", i);
-                    }
-                }
+                e.printStackTrace();
             }
         }
     }

@@ -5,16 +5,15 @@ import java.io.*;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-import java.util.Scanner;
 
-public class Client {
+public class Client { //TODO add gui
 
     static PrintStream ps;
 
-    static ArrayList<User> Clients = Server.Clients;
+    static ArrayList<User> Clients = Server.clients;
     int clientNum;
 
-    String Username;
+    String username;
 
     String IP;
     int Port;
@@ -45,27 +44,34 @@ public class Client {
             ps = new PrintStream(System.out, true, StandardCharsets.UTF_8);
             clientSocket = new Socket(IP, Port);
             in = new ObjectInputStream(clientSocket.getInputStream());
-            ps.println(in.readUTF());
+            String[] usernameArgs = in.readUTF().split("@");
+            ps.println(usernameArgs[0]);
 
 
             out = new ObjectOutputStream(clientSocket.getOutputStream());
             read = new ConsoleReadThread(10);
             read.start();
             read.join();
-            String username = read.getData();
-            if (username == null) username = Server.Clients.get(clientNum).getName();
-            Username = username;
+            String user = read.getData();
+            if (user == null) user = usernameArgs[1];
+            username = user;
             send(username); // username
 
-            int counter = Server.Questions.size();
+            int counter = Server.questions.size();
             while (counter != 0) {
-                ps.println(in.readUTF()); // question
+                String[] quesAndAns = in.readUTF().split("@");
+
+                ps.println(quesAndAns[0]); // question
+                ps.println(quesAndAns[1]); // options
 
                 read = new ConsoleReadThread(15);
                 read.start();
                 read.join();
                 String answer = read.getData();
-                if (answer == null) answer = "0";
+                if (answer == null){
+                    System.out.println("Timeout no answer");
+                    answer = "0";
+                }
                 send(answer); // answer
 
                 ps.println(in.readUTF()); // scoreboard
