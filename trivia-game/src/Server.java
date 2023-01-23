@@ -7,13 +7,10 @@ import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 import JSONHandler.*;
-import com.sun.source.tree.SynchronizedTree;
 
 public class Server { //TODO add gui
-    int Port;
+    int port;
     ConnThread connThread = new ConnThread();
-    ServerSocket serverSocket;
-    Socket server;
     static ArrayList<ClientThread> threads = new ArrayList<>();
     static Hashtable<String, Integer> names = new Hashtable<>();
     static Hashtable<String, Integer> scores = new Hashtable<>();
@@ -21,12 +18,16 @@ public class Server { //TODO add gui
     static ArrayList<User> clients = JSONReader.getClients("src/JSONHandler/users.json");
     static User host = JSONReader.getHost("src/JSONHandler/users.json");
 
+    static final int USERNAME_TIME = 15; // 15 seconds for sending username
+    static final int QUESTION_TIME = 45; // 45 seconds for sending answer
+    static final int TOTAL_CHAT_TIME = 60; // 1 minute total chat time
+    static final int EACH_CHAT_PERIOD = 15; // 15 seconds for every chat period
+
     static int numClients = 0; //how many clients
-    boolean newGame = false; //new game started or not
-    PrintStream ps;
+    PrintStream ps; // used for printing
 
     public Server(int port) {
-        this.Port = port;
+        this.port = port;
         ps = new PrintStream(System.out, true, StandardCharsets.UTF_8);
     }
 
@@ -41,7 +42,7 @@ public class Server { //TODO add gui
         server.startConn();
     }
 
-    public void closeConn() throws Exception {
+    public void closeConn(){
         try {
             connThread.closeConn();
         } catch (Exception e) {
@@ -55,11 +56,11 @@ public class Server { //TODO add gui
 
         public void run() {
             try {
-                serverSocket = new ServerSocket(Port);
-                System.out.println("Server created on port " + Port);
+                serverSocket = new ServerSocket(port);
+                System.out.println("Server created on port " + port);
 
                 int counter = 0;
-                while (true) {
+                do { // waits until all clients are connected
 
                     ClientThread t1 = new ClientThread(serverSocket.accept());
                     if (counter < clients.size()) {
@@ -69,10 +70,7 @@ public class Server { //TODO add gui
                         t1.start();
                         t1.setNum(numClients - 1);
                     }
-                    if (counter == clients.size()) {
-                        break;
-                    }
-                }
+                } while (counter != clients.size());
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -89,7 +87,7 @@ public class Server { //TODO add gui
         }
     }
 
-    class ClientThread extends Thread {
+    class ClientThread extends Thread { // handles each client's connection
         String username;
         int num;
 
@@ -111,7 +109,7 @@ public class Server { //TODO add gui
             this.username = username;
         }
 
-        public void sendTo(String data, int index) {
+        public void sendTo(String data, int index) { // sends data to client number {index}
             try {
                 threads.get(index).send(data);
             } catch (Exception e) {
@@ -120,7 +118,7 @@ public class Server { //TODO add gui
             }
         }
 
-        public void send(String data) {
+        public void send(String data) { // sends data to this thread's client
             try {
                 out.writeUTF(data);
                 out.flush();
@@ -133,10 +131,10 @@ public class Server { //TODO add gui
         public void run() {
 
             try {
-                connThread.join();
+                connThread.join(); // wait for all clients to connect
 
                 out = new ObjectOutputStream(socket.getOutputStream());
-                send(String.format("welcome send your name@%s", clients.get(num).getName()));
+                send(String.format("welcome send your name@%s", clients.get(num).getName())); // sends a prompt for client to enter a username
 
                 in = new ObjectInputStream(socket.getInputStream());
 
@@ -146,44 +144,44 @@ public class Server { //TODO add gui
 
                 setUsername(clientUsername);
 
-                names.put(username, num);
-                scores.put(username, score);
+                names.put(username, num); //names is a hashtable for mapping username to client number
+                scores.put(username, score); //scores is a hashtable for mapping username to score
 
-                Thread.sleep(11000 - (endTime - startTime));
+                Thread.sleep((USERNAME_TIME + 1) * 1000 - (endTime - startTime)); // waits for all clients to send their usernames
                 for (Question q : questions) {
                     ps.println(q.getQuestion()); // test
                     ps.println(q.getOptions());  // test
 
-                    StringBuilder stringBuilder = new StringBuilder();
+                    StringBuilder stringBuilder = new StringBuilder(); // stringBuilder for formatting the options
                     int i = 1;
                     for (String s : q.getOptions()) {
                         stringBuilder.append(i).append(". ").append(s).append("\n");
                         i++;
                     }
                     stringBuilder.deleteCharAt(stringBuilder.length() - 1);
-                    send(String.format("%20s@%5s", q.getQuestion(), stringBuilder));
+                    send(String.format("%20s@%5s", q.getQuestion(), stringBuilder)); // sends question with options
 
                     startTime = System.currentTimeMillis();
                     String answer = in.readUTF(); // answer
                     endTime = System.currentTimeMillis();
-                    ps.println(username + ":" + answer);
+                    ps.println(username + ":" + answer); // test
 
                     if (answer.equals(Integer.toString((int) q.getAnswer()))) { // check answer
                         score++;
                         scores.replace(username, score); // update scoreboard
                     }
 
-                    Thread.sleep(16000 - (endTime - startTime));
+                    Thread.sleep((QUESTION_TIME + 1)*1000 - (endTime - startTime));
 
-                    StringBuilder sb = new StringBuilder();
-                    List<String> listKeys = new ArrayList<String>(scores.keySet());
+                    StringBuilder sb = new StringBuilder();// string builder for formatting scoreboard
+                    List<String> listKeys = new ArrayList<>(scores.keySet());
                     Object[] list = listKeys.toArray();
-                    Arrays.sort(list, (o1, o2) -> scores.get((String) o2) - scores.get((String) o1));
-                    System.out.println(Arrays.toString(list));
+                    Arrays.sort(list, (o1, o2) -> scores.get((String) o2) - scores.get((String) o1)); // sorting scoreboard
+                    System.out.println(Arrays.toString(list)); // test
                     for (Object o : list) {
                         String name = (String) o;
                         if (name.equals(username)) {
-                            sb.append("YOU").append(": ").append(scores.get(name)).append("\n");
+                            sb.append("YOU").append(": ").append(scores.get(name)).append("\n"); // send every client others username and YOU for itself
                             continue;
                         }
                         sb.append(name).append(": ").append(scores.get(name)).append("\n");
@@ -191,7 +189,7 @@ public class Server { //TODO add gui
                     sb.deleteCharAt(sb.length() - 1);
                     send(sb.toString()); // scoreboard
 
-                    Thread.sleep(2000);
+                    Thread.sleep(2000); // before chat
 
                     StringBuilder otherUsers = new StringBuilder();
                     for (ClientThread ct : threads) {
@@ -212,7 +210,8 @@ public class Server { //TODO add gui
 
                         System.out.println(Message);
 
-                        if (10100 - (endTime - startTime) > 0) Thread.sleep(10100 - (endTime - startTime));
+                        if ((EACH_CHAT_PERIOD * 1000 + 100) - (endTime - startTime) > 0)
+                            Thread.sleep((EACH_CHAT_PERIOD * 1000 + 100) - (endTime - startTime));
 
                         String[] split = Message.split(":");
 
@@ -222,8 +221,8 @@ public class Server { //TODO add gui
                         if (split.length == 2) {
                             sendTo("Message from " + username + ": " + split[1], names.get(split[0]));
                         }
-                    } while (System.currentTimeMillis() - chatStartTime < 30000);
-                    send("end chat");
+                    } while (System.currentTimeMillis() - chatStartTime < TOTAL_CHAT_TIME*1000); // finishes when total chat time is passed
+                    send("end chat"); // closes chat thread on client side
                 }
             } catch (Exception e) {
                 System.out.println("Client: " + username + " closed");

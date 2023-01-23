@@ -1,19 +1,13 @@
 import ConsoleInputHandler.ConsoleReadThread;
-import JSONHandler.User;
 
 import java.io.*;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class Client { //TODO add gui
 
     static PrintStream ps;
-
-    static ArrayList<User> Clients = Server.clients;
-    int clientNum;
 
     String username;
 
@@ -51,7 +45,7 @@ public class Client { //TODO add gui
 
 
             out = new ObjectOutputStream(clientSocket.getOutputStream());
-            read = new ConsoleReadThread(10);
+            read = new ConsoleReadThread(Server.USERNAME_TIME);
             read.start();
             read.join();
             String user = read.getData();
@@ -66,7 +60,7 @@ public class Client { //TODO add gui
                 ps.println(quesAndAns[0]); // question
                 ps.println(quesAndAns[1]); // options
 
-                read = new ConsoleReadThread(15);
+                read = new ConsoleReadThread(Server.QUESTION_TIME);
                 read.start();
                 read.join();
                 String answer = read.getData();
@@ -82,20 +76,20 @@ public class Client { //TODO add gui
 
                 ps.println(in.readUTF()); // scoreboard
 
-                ChatHandler chat = new ChatHandler();
+                ChatHandler chat = new ChatHandler(); // thread for constantly reading from other clients
                 chat.start();
                 long startTime = System.currentTimeMillis();
                 do {
                     long beforeReadTime = System.currentTimeMillis();
-                    read = new ConsoleReadThread(10);
+                    read = new ConsoleReadThread(Server.EACH_CHAT_PERIOD);
                     read.start();
                     read.join();
-                    Thread.sleep(10500 - (System.currentTimeMillis() - beforeReadTime));
+
+                    Thread.sleep((Server.EACH_CHAT_PERIOD * 1000 + 500) - (System.currentTimeMillis() - beforeReadTime)); // wait until each chat time is passed
                     String send = read.getData();
                     if (send == null) send = "";
                     send(send);
-                    //System.out.println(System.currentTimeMillis() - startTime);
-                } while (System.currentTimeMillis() - startTime < 30000);
+                } while (System.currentTimeMillis() - startTime < Server.TOTAL_CHAT_TIME * 1000); // finishes when total chat time is passed
                 chat.join();
                 counter--;
             }
@@ -134,7 +128,7 @@ public class Client { //TODO add gui
     }
 
     public static void main(String[] args) {
-        Client client = new Client("127.0.0.1", 8080);
+        Client client = new Client("127.0.0.1", (int) Server.host.getPort());
         client.StartClient();
     }
 }
